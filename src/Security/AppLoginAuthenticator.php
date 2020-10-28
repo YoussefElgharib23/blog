@@ -2,7 +2,9 @@
 
 namespace App\Security;
 
+use App\Entity\Ip;
 use App\Entity\User;
+use App\Repository\IpRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,13 +32,18 @@ class AppLoginAuthenticator extends AbstractFormLoginAuthenticator implements Pa
     private $urlGenerator;
     private $csrfTokenManager;
     private $passwordEncoder;
+    /**
+     * @var IpRepository
+     */
+    private $repository;
 
-    public function __construct(EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(IpRepository $repository, EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->entityManager = $entityManager;
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
+        $this->repository = $repository;
     }
 
     public function supports(Request $request)
@@ -94,6 +101,12 @@ class AppLoginAuthenticator extends AbstractFormLoginAuthenticator implements Pa
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)
     {
+        $ip = ( new Ip() )->setIpAddress($request->getClientIp())->setIpType('ADMIN');
+        if ( NULL === $this->repository->findOneBy(['ipAddress' => $ip->getIpAddress()]) ) {
+            $this->entityManager->persist($ip);
+            $this->entityManager->flush();
+        }
+
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
             return new RedirectResponse($targetPath);
         }

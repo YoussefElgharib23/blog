@@ -8,12 +8,12 @@ trait TimeStamps
 {
 
     /**
-     * @ORM\Column(type="datetime", options={"defaults"="CURRENT_TIMESTAMP"})
+     * @ORM\Column(type="datetime", options={"defaults": "CURRENT_TIMESTAMP"})
      */
     private $created_at;
 
     /**
-     * @ORM\Column(type="datetime", options={"defaults"="CURRENT_TIMESTAMP"})
+     * @ORM\Column(type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     private $updated_at;
 

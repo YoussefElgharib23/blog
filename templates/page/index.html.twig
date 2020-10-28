@@ -3,7 +3,36 @@
 {% block title 'Welcome' %}
 
 {% block body %}
-    <div class="container">
-        <h1 class="mt-5 text-center">Welcome, Mr {{ app.user.fullName }}</h1>
+    {{ include('layouts/_dashboard_navbar.html.twig') }}
+    <div class="container my-4">
+        <h1 class="text-center">Welcome, Mr {{ app.user.fullName }}</h1>
+    </div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="mb-2 col-md-4 text-white">
+                <div class="dashboard-card rounded text-center shadow p-3 d-flex align-items-center" style="height: 300px; background-color: darkred">
+                    <div class="w-100">
+                        <h1 class="h2 font-weight-bolder">Total Posts <br><i class="fas fa-sticky-note"></i></h1>
+                        <p style="font-size: 20px">{{ PostCount }} Post</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-2 col-md-4 text-white">
+                <div class="dashboard-card rounded text-center shadow p-3 d-flex align-items-center" style="height: 300px; background-color: darkred">
+                    <div class="w-100">
+                        <h1 class="h2 font-weight-bolder">Total Comments <br> <i class="fas fa-comment"></i> </h1>
+                        <p style="font-size: 20px">O Post</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-2 col-md-4 text-white">
+                <div class="dashboard-card rounded text-center shadow p-3 d-flex align-items-center" style="height: 300px; background-color: darkred">
+                    <div class="w-100">
+                        <h1 class="h2 font-weight-bolder">Total Views <br> <i class="fas fa-eye"></i></h1>
+                        <p style="font-size: 20px">{{ pluralize(views) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

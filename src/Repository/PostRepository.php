@@ -19,6 +19,23 @@ class PostRepository extends ServiceEntityRepository
         parent::__construct($registry, Post::class);
     }
 
+    /**
+     * RETURN ALL THE POSTS EXCEPT THE POST GIVEN IN PARAMETER
+     *
+     * @param Post $post
+     * @return array|null
+     */
+    public function findExcept(Post $post):? array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.title != :val')
+            ->setParameter('val', $post->getTitle())
+            ->orderBy('p.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     // /**
     //  * @return Post[] Returns an array of Post objects
     //  */

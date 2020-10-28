@@ -7,3 +7,40 @@
 * {
     font-family: 'Quicksand', sans-serif;
 }
+
+.dashboard-card {
+    transition: transform .4s ease-in-out, box-shadow .4s ease-in-out;
+    &:hover {
+        transform: scale(1.02);
+        @extend .shadow-lg;
+    }
+}
+
+.link-c {
+    transition: color .2s ease-in-out;
+    color: black;
+    &:hover {
+        color: #fe4f4f !important;
+        @extend .text-decoration-none
+    }
+}
+
+.icon-edit-back {
+    background: silver;
+    height: 45px;
+    width: 45px;
+    display: block;
+    float: right;
+    /* border-radius: 50%; */
+    position: relative;
+    top: -21px;
+    left: 22px;
+    transform: rotate(45deg);
+}
+
+.edit-icon {
+    position: relative;
+    top: 27px;
+    left: -15px;
+    transform: rotate(-45deg);
+}
