@@ -1,15 +1,14 @@
 {% extends "base.html.twig" %}
 
-{% block title 'Create new category' %}
+{% block title 'Edit category ' ~ category.id %}
 
 {% block body %}
-
 {{ include('layouts/_dashboard_navbar.html.twig') }}
 <div class="container">
     <div class="row">
         <div class="col-md-6 mx-auto">
-            <h1 class="text-center my-4">Create new category</h1>
-            {{ include('category/shared/_form_category.html.twig', {action: 'create'}) }}
+            <h1 class="text-center my-4">Edit the category</h1>
+            {{ include('category/shared/_form_category.html.twig') }}
         </div>
     </div>
 </div>

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Form\CategoryFormType;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -58,7 +59,7 @@ class CategoryController extends AbstractController
     /**
      * Undocumented function
      *
-     * @Route("/create", name="category_create", methods={"GET", "POST"})
+     * @Route("/create", name="create", methods={"GET", "POST"})
      */
     public function create(Request $request)
     {
@@ -78,8 +79,48 @@ class CategoryController extends AbstractController
         ]);
     }
 
-    public function edit(Category $category) {}
+    /**
+     * EDIT THE CATEGORY
+     *
+     * @Route("/{id}/edit", name="edit", methods={"GET", "PUT"}, requirements={"id": "\d+"})
+     * @param Category $category
+     * @param Request $request
+     * @return Response
+     */
+    public function edit(Request $request, Category $category): Response
+    {
+        $form = $this->createForm(CategoryFormType::class, $category, ['method' => 'PUT']);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() AND $form->isValid()) {
+            $this->em->flush();
+            
+            $this->flashy->success("The cateogry was updated with success !");
 
-    public function delete(Category $category)
-    {}
+            return $this->redirectToRoute('app_category_index');
+        }
+        return $this->render('category/edit.html.twig', [
+            'form' => $form->createView(),
+            'category' => $category
+        ]);
+    }
+
+    /**
+     * DELTET THE GIVEN POST
+     *
+     * @Route("/{id}/delete", name="delete", methods={"DELETE"}, requirements={"id": "\d+"})
+     * @param Category $category
+     * @param Request $request
+     * @return Response
+     */
+    public function delete(Request $request, Category $category): Response
+    {
+        if ($this->isCsrfTokenValid('delete_category' . $category->getId(), $request->request->get('_token'))) 
+        {
+            $this->em->remove($category);
+            $this->em->flush();
+
+            $this->flashy->success("The category was deleted with success");
+        }
+        return $this->redirectToRoute('app_category_index');
+    }
 }
