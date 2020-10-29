@@ -19,6 +19,22 @@ class CategoryRepository extends ServiceEntityRepository
         parent::__construct($registry, Category::class);
     }
 
+    /**
+     * GET ALL UNTRASHED CATEGORY
+     *  
+     * @return array | null
+     */
+    public function findUntrashedCategory($value):? array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.deleted_at = :val')
+            ->setParameter('val', $value)
+            ->orderBy('c.created_at', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
     // /**
     //  * @return Category[] Returns an array of Category objects
     //  */
