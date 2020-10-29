@@ -4,33 +4,33 @@
 
 {% block body %}
 
-    {{ include('layouts/_dashboard_navbar.html.twig') }}
-    <div class="container">
-        {% if categories | length == 0 %}
-            <div class="mt-4 alert alert-danger text-center" role="alert">Sorry No Category ! <br> Try add new
-                <a href="">one</a>
-            </div>
-        {% else %}
-            <table class="table-striped table table-responsive">
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for category in categories %}
-                    <tr>
-                        <td>{{ category.name }}</td>
-                        <td>
-                            <a href="" class="btn btn-outline-primary">Edit</a>
-                            <a href="" class="btn btn-outline-primary">Edit</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {% endif %}
+{{ include('layouts/_dashboard_navbar.html.twig') }}
+<div class="container">
+    {% if categories | length == 0 %}
+    <div class="mt-4 alert alert-danger text-center" role="alert">Sorry No Category ! <br> Try add new
+        <a href="{{ path('app_category_create') }}">one</a>
     </div>
+    {% else %}
+    <table class="table-striped table table-responsive">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <td>{{ category.name }}</td>
+                <td>
+                    <a href="" class="btn btn-outline-primary">Edit</a>
+                    <a href="" class="btn btn-outline-primary">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
 
 {% endblock %}
