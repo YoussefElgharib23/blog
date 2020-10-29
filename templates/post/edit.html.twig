@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Edit ' ~ post.slug %}
+
+{% block body %}
+
+    {{ include('layouts/_dashboard_navbar.html.twig') }}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <h1 class="text-center">Edit your post</h1>
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
+                <input type="submit" value="Edit" class="btn btn-outline-success btn-block">
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

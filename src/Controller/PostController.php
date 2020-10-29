@@ -8,11 +8,13 @@ use App\Form\PostFormType;
 use App\Repository\IpRepository;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use MercurySeries\FlashyBundle\FlashyNotifier;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Class PostController
@@ -34,12 +36,17 @@ class PostController extends AbstractController
      * @var IpRepository
      */
     private $ipRepository;
+    /**
+     * @var FlashyNotifier
+     */
+    private $flashy;
 
-    public function __construct(EntityManagerInterface $em, PostRepository $repository, IpRepository $ipRepository)
+    public function __construct(FlashyNotifier $flashy, EntityManagerInterface $em, PostRepository $repository, IpRepository $ipRepository)
     {
         $this->em = $em;
         $this->repository = $repository;
         $this->ipRepository = $ipRepository;
+        $this->flashy = $flashy;
     }
 
     /**
@@ -57,6 +64,8 @@ class PostController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($post);
             $this->em->flush();
+
+            $this->flashy->success('The post was created with success', $this->generateUrl('app_post_show', ['id' => $post->getId(), 'slug' => $post->getSlug()]));
 
             return $this->redirectToRoute('app_post_create');
         }
@@ -106,5 +115,44 @@ class PostController extends AbstractController
             $post->incrementViews();
         }
         return $this->render('Post/show.html.twig', compact('post'));
+    }
+
+    /**
+     *
+     * @Route(path="/edit/{id}", methods={"GET", "PUT"}, requirements={"id": "\d+"})
+     * @param Request $request
+     * @param Post $post
+     * @return Response
+     */
+    public function edit(Request $request, Post $post)
+    {
+        $form = $this->createForm(PostFormType::class, $post, ['method' => 'PUT']);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() AND $form->isValid()) {
+            $this->em->flush();
+            $this->flashy->success('Your post was updated with success');
+
+            return $this->redirectToRoute('app_post_show_list');
+        }
+
+        return $this->render('Post/edit.html.twig', [
+            'form' => $form->createView(),
+            'post' => $post
+        ]);
+    }
+
+    /**
+     * @Route(path="/{id}/delete", name="post_delete", methods={"DELETE"}, requirements={"id": "\d+"})
+     * @param Post $post
+     * @param Request $request
+     * @return Response
+     */
+    public function deletePost(Post $post, Request $request)
+    {
+        if ($this->isCsrfTokenValid('delete_post' . $post->getId(), $request->query->get('_token'))) {
+            $this->em->remove($post);
+            $this->em->flush();
+        }
+        return $this->redirectToRoute('app_post_show_list');
     }
 }
