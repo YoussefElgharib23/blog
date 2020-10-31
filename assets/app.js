@@ -14,8 +14,7 @@ import 'bootstrap';
 require('@fortawesome/fontawesome-free/css/all.min.css');
 require('@fortawesome/fontawesome-free/js/all.js');
 import flashy from "./lib/js/flashy.js";
+import ajax from './lib/js/ajax';
+import ajax_post_search from './lib/js/post_ajax_search';
 
 window.flashy = flashy;
-
-
-console.log('Hello Webpack Encore! Edit me in assets/app.js');

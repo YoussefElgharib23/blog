@@ -6,6 +6,7 @@ use App\Entity\Category;
 use App\Form\CategoryFormType;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,6 +37,7 @@ class CategoryController extends AbstractController
 
     /**
      * CategoryController constructor.
+     * @param FlashyNotifier $flashy
      * @param CategoryRepository $repository
      * @param EntityManagerInterface $em
      */
@@ -60,6 +62,8 @@ class CategoryController extends AbstractController
      * Undocumented function
      *
      * @Route("/create", name="create", methods={"GET", "POST"})
+     * @param Request $request
+     * @return RedirectResponse|Response
      */
     public function create(Request $request)
     {
@@ -105,7 +109,7 @@ class CategoryController extends AbstractController
     }
 
     /**
-     * DELTET THE GIVEN POST
+     * DELETED THE GIVEN POST
      *
      * @Route("/{id}/delete", name="delete", methods={"DELETE"}, requirements={"id": "\d+"})
      * @param Category $category

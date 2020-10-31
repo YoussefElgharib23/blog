@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Post;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -34,6 +35,26 @@ class PostRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    /**
+     * FIND THE RELATED POST
+     *
+     * @param Post $post
+     * @return Post
+     * @throws NonUniqueResultException
+     */
+    public function findRelatedPost(Post $post):? Post
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.category = :cat')
+            ->andWhere('p.id != :id')
+            ->setMaxResults(1)
+            ->setParameter('cat', $post->getCategory())
+            ->setParameter('id', $post->getId())
+            ->getQuery()
+            ->getOneOrNullResult()
+            ;
     }
 
     // /**

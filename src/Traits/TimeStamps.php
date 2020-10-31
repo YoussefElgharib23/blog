@@ -17,6 +17,40 @@ trait TimeStamps
      */
     private $updated_at;
 
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $formattedCreatedAt;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $formattedUpdatedAt;
+
+    public function setFormattedCreatedAt()
+    {
+        $formattedCreatedAt = date_format($this->getCreatedAt(), 'M d, Y');
+
+        return $this;
+    }
+
+    public function setFormattedUpdatedAt()
+    {
+        $formattedUpdatedAt = date_format($this->getUpdatedAt(), 'M d, Y');
+
+        return $this;
+    }
+
+    public function getFormattedCreatedAt()
+    {
+        return $this->formattedCreatedAt;
+    }
+
+    public function getFormattedUpdatedAt()
+    {
+        return $this->formattedUpdatedAt;
+    }
+
     public function getCreatedAt(): ?\DateTimeInterface
     {
         return $this->created_at;

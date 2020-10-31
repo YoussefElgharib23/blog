@@ -1,4 +1,4 @@
-<form id="delete-form-js" action="{{ path('app_post_post_delete', {'id': post.id}) }}" method="POST" onsubmit="return confirm('Are you sure to delete the post !')">
+<form id="delete-post-js-{{ post.id }}" action="{{ path('app_admin_post_delete', {'id': post.id}) }}" method="POST" onsubmit="return confirm('Are you sure to delete the post !')">
     <input type="hidden" name="_method" value="DELETE">
-    <input type="hidden" name="_csrf" value="{{ csrf_token('delete_post' ~ post.id) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete_post' ~ post.id) }}">
 </form>

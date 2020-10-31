@@ -7,6 +7,7 @@ use App\Traits\TimeStamps;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=PostRepository::class)
@@ -21,32 +22,38 @@ class Post
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("post:ajax")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("post:ajax")
      */
     private $title;
 
     /**
      * @ORM\Column(type="text")
+     * @Groups("post:ajax")
      */
     private $description;
 
     /**
      * @ORM\Column(type="integer", options={"defaults":0})
+     * @Groups("post:ajax")
      */
     private $views;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups("post:ajax")
      */
     private $imageLink;
 
     /**
      * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="posts")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups("posts:ajax")
      */
     private $category;
 
@@ -128,5 +135,10 @@ class Post
         $this->category = $category;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->getCategory()->getName();
     }
 }

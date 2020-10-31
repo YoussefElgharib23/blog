@@ -17,8 +17,8 @@ class PostFormType extends AbstractType
             ->add('imageLink')
             ->add('title')
             ->add('category', EntityType::class, [
+                'choice_label' => 'name',
                 'class' => Category::class,
-                'choice_name' => 'name',
             ])
             ->add('description')
         ;

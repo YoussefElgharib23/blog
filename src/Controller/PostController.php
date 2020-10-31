@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Category;
 use App\Entity\Ip;
 use App\Entity\Post;
+use App\Form\CategoryFormType;
 use App\Form\PostFormType;
+use App\Repository\CategoryRepository;
 use App\Repository\IpRepository;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,13 +43,18 @@ class PostController extends AbstractController
      * @var FlashyNotifier
      */
     private $flashy;
+    /**
+     * @var CategoryRepository
+     */
+    private $categoryRepository;
 
-    public function __construct(FlashyNotifier $flashy, EntityManagerInterface $em, PostRepository $repository, IpRepository $ipRepository)
+    public function __construct(CategoryRepository $categoryRepository, FlashyNotifier $flashy, EntityManagerInterface $em, PostRepository $repository, IpRepository $ipRepository)
     {
         $this->em = $em;
         $this->repository = $repository;
         $this->ipRepository = $ipRepository;
         $this->flashy = $flashy;
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -57,7 +65,10 @@ class PostController extends AbstractController
     public function createNewPost(Request $request)
     {
         $post = (new Post())->setViews(0);
+        $category = new Category();
         $form = $this->createForm(PostFormType::class, $post);
+        $categoryForm = $this->createForm(CategoryFormType::class, $category);
+        $categories = $this->categoryRepository->findAll();
 
         $form->handleRequest($request);
 
@@ -72,7 +83,9 @@ class PostController extends AbstractController
 
         return $this->render('Post/index.html.twig', [
             'cm'   => 'create',
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'catForm' => $categoryForm->createView(),
+            'categories' => $categories
         ]);
     }
 
