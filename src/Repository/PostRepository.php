@@ -21,6 +21,25 @@ class PostRepository extends ServiceEntityRepository
     }
 
     /**
+     * RETURN ALL THE POSTS WITHOUT THE CURRENT ONE
+     *
+     * @param Post $post
+     * @param Post $relatedPost
+     * @return array | null
+     */
+    public function previousPosts(Post $post, Post $relatedPost):? array
+    {
+        return $this->createQueryBuilder('p')
+            ->where('p.id != :id and p.id != :idR')
+            ->setParameters(['id' => $post->getId(), 'idR' => $relatedPost->getId()])
+            ->orderBy('p.created_at', 'DESC')
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
      * RETURN ALL THE POSTS EXCEPT THE POST GIVEN IN PARAMETER
      *
      * @param Post $post

@@ -24,13 +24,13 @@ class Category
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups("posts:ajax")
+     * @Groups("post:ajax")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("posts:ajax")
+     * @Groups("post:ajax")
      */
     private $name;
 

@@ -1,9 +1,10 @@
 {% set defaultImage = 'https://images.pexels.com/photos/5014775/pexels-photo-5014775.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940' %}
 {% if posts | length > 0 %}
     <h2 class="text-center">All posts</h2>
-    <div class="form-inline my-2" style="position: relative;">
+    <div class="d-s-i-p form-inline my-2" style="position: relative;">
         <i class="fa fa-search text-muted" style="position: relative;z-index: 100;"></i>
         <input type="text" id="search-in-post-js" placeholder="Search for post" >
+        <button type="submit"></button>
     </div>
     {% for row in posts | batch(4) %}
         <div class="row mt-4">
@@ -23,7 +24,7 @@
                              src="{{ post.imageLink ?? defaultImage }}">
                     </div>
                     <small><span style="color: #fe4f4f">{{ post.category.name }}</span> - {{ post.createdAt | date('M, d Y') }}</small>
-                    <h2 class="h5"><a href="{{ path('app_admin_post_show', {'id': post.id, 'slug': post.slug}) }}" class="text-decoration-none text-dark">{{ post.title | u.truncate(25, '...', false) }}</a>
+                    <h2 class="_font-change-28 h5"><a href="{{ path('app_admin_post_show', {'id': post.id, 'slug': post.slug}) }}" class="text-decoration-none text-dark">{{ post.title | u.truncate(25, '...', false) }}</a>
                     </h2>
                 </div>
             {% endfor %}

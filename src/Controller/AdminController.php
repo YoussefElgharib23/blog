@@ -86,6 +86,27 @@ class AdminController extends AbstractController
     }
 
     /**
+     * SHOW THE POST BY ID
+     *
+     * @Route("/posts/{slug}-{id}", name="post_show", methods={"GET"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
+     * @param Post $post
+     * @return Response
+     * @throws NonUniqueResultException
+     */
+    public function showPost(Post $post): Response
+    {
+        $relatedPost = $this->postRepository->findRelatedPost($post);
+        $categories = $this->categoryRepository->findAll();
+        $previousPosts = $this->postRepository->previousPosts($post, $relatedPost);
+        return $this->render('admin/show_post.html.twig', [
+            'post' => $post,
+            'relatedPost' => $relatedPost,
+            'categories' => $categories,
+            'previousPosts' => $previousPosts
+        ]);
+    }
+
+    /**
      *
      * @Route("/{id}/delete", name="post_delete", methods={"DELETE"}, requirements={"id": "\d+"})
      * @param Request $request
@@ -102,22 +123,5 @@ class AdminController extends AbstractController
             $this->flashyNotifier->success('The post was deleted with success');
         }
         return $this->redirectToRoute(self::INDEX_ROUTE);
-    }
-
-    /**
-     * SHOW THE POST BY ID
-     *
-     * @Route("/posts/{id}-{slug}", name="post_show", methods={"GET"}, requirements={"id": "\d+"})
-     * @param Post $post
-     * @return Response
-     * @throws NonUniqueResultException
-     */
-    public function showPost(Post $post): Response
-    {
-        $relatedPost = $this->postRepository->findRelatedPost($post);
-        return $this->render('admin/show_post.html.twig', [
-            'post' => $post,
-            'relatedPost' => $relatedPost
-        ]);
     }
 }

@@ -75,10 +75,11 @@ class AjaxController extends AbstractController
             {
                 if (stristr($title, substr(strtolower($post->getTitle()), 0, $len))) $foundedPosts[] = $post;
             }
+
+
+            return $this->json($foundedPosts , 200, [], ['groups' => 'post:ajax']);
         }
-        elseif (trim($title) === '') {
-            $foundedPosts = $posts;
-        }
+
         return $this->json($posts , 200, [], ['groups' => 'post:ajax']);
     }
 }

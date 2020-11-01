@@ -53,7 +53,7 @@ class Post
     /**
      * @ORM\ManyToOne(targetEntity=Category::class, inversedBy="posts")
      * @ORM\JoinColumn(nullable=false)
-     * @Groups("posts:ajax")
+     * @Groups("post:ajax")
      */
     private $category;
 
