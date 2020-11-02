@@ -5,13 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b65583b-a366-43c7-b263-8f198f9ec7bf" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/blog.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/blog.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/assets/Sass/app.scss" beforeDir="false" afterPath="$PROJECT_DIR$/assets/Sass/app.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" afterPath="$PROJECT_DIR$/composer.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/Version20201029171648.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/Version20201030014510.php" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Controller/AdminController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/AdminController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/AjaxController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/AjaxController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Category.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Category.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Post.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Post.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Repository/PostRepository.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Repository/PostRepository.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/symfony.lock" beforeDir="false" afterPath="$PROJECT_DIR$/symfony.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/admin/index.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/index.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/admin/show_post.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/show_post.html.twig" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/post/_all.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/post/_all.html.twig" afterDir="false" />
@@ -138,6 +141,7 @@
       <path value="$PROJECT_DIR$/vendor/mercuryseries/flashy-bundle" />
       <path value="$PROJECT_DIR$/vendor/twig/string-extra" />
       <path value="$PROJECT_DIR$/vendor/fzaninotto/faker" />
+      <path value="$PROJECT_DIR$/vendor/symfony/apache-pack" />
     </include_path>
   </component>
   <component name="ProjectId" id="1jTY3D7OAQo3J5MXnMPWHITkmA3" />
@@ -149,6 +153,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="nodejs_package_manager_path" value="npm" />
+    <property name="php.override.implement.member.chooser.php.doc" value="NONE" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
@@ -170,7 +175,8 @@
       <workItem from="1604063693938" duration="837000" />
       <workItem from="1604075600033" duration="10277000" />
       <workItem from="1604157355059" duration="11200000" />
-      <workItem from="1604192972880" duration="1527000" />
+      <workItem from="1604192972880" duration="5187000" />
+      <workItem from="1604341460108" duration="3434000" />
     </task>
     <servers />
   </component>
@@ -178,10 +184,10 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="574" y="128" key="#com.intellij.ide.util.MemberChooser" timestamp="1604077957614">
+    <state x="574" y="128" key="#com.intellij.ide.util.MemberChooser" timestamp="1604344612176">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="574" y="128" key="#com.intellij.ide.util.MemberChooser/0.0.1536.824@0.0.1536.824" timestamp="1604077957614" />
+    <state x="574" y="128" key="#com.intellij.ide.util.MemberChooser/0.0.1536.824@0.0.1536.824" timestamp="1604344612176" />
     <state x="499" y="207" key="#com.jetbrains.php.actions.copyPaste.importReferences.PhpImportReferencesDialog" timestamp="1603832328150">
       <screen x="0" y="40" width="1536" height="824" />
     </state>
@@ -198,10 +204,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="93" y="93" width="1350" height="638" key="dock-window-1/0.0.1536.824@0.0.1536.824" timestamp="1604077334476" />
-    <state x="430" y="145" width="672" height="600" key="search.everywhere.popup" timestamp="1604194341482">
+    <state x="430" y="145" width="672" height="600" key="search.everywhere.popup" timestamp="1604344913624">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="430" y="145" width="672" height="600" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1604194341482" />
+    <state x="430" y="145" width="672" height="600" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1604344913624" />
     <state x="431" y="185" width="672" height="160" key="search.everywhere.popup/0.40.1536.824@0.40.1536.824" timestamp="1603922880034" />
   </component>
 </project>

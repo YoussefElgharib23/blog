@@ -9,12 +9,13 @@
             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                 <p class="mt-3">
                     <a href="#" id="show-hide-f-js" class="mt-2 link-c"><i class="fas fa-eye"></i>
-                        <span class="i-text-js"><span id="word-js">{{ posts | length > 0 ? 'Show' : 'Hide' }}</span> create form</span>
+                        <span class="i-text-js"><span id="word-js">{{ posts | length > 0  ? 'Show' : 'Hide' }}</span> create form</span>
+                        <i class="fa fa-angle-up" style="position: relative; top: 2px; transform: rotate({{ posts | length > 0 ? '180' : '0' }}deg)" ></i>
                     </a>
                 </p>
                 <div class="row">
                     <div class="col-md-6 mx-auto">
-                        <div class="h-c-p" {{ posts | length > 0 ? 'style="display: none"' : '' }}>
+                        <div class="h-c-p" {{posts | length > 0 ? 'style="display: none"' : '' }}>
                             <h1 class="text-center mt-4">Create new post</h1>
                             {{ include('post/_create_form.html.twig') }}
                             <hr>
@@ -54,7 +55,16 @@
         $('#show-hide-f-js').click(function (event) {
             event.preventDefault();
             $('.h-c-p').slideToggle();
-            $(this).find('span#word-js').text() === 'Hide' ? $(this).find('span#word-js').text('Show') : $(this).find('span#word-js').text('Hide') ;
+            if ($(this).find('span#word-js').text() === 'Hide')
+            {
+                $(this).find('span#word-js').text('Show');
+                $(this).find('svg.fa-angle-up').css('transform', 'rotate(180deg)');
+            }
+            else {
+
+                $(this).find('span#word-js').text('Hide');
+                $(this).find('svg.fa-angle-up').css('transform', 'rotate(0)');
+            }
         });
 
         $('*#btn-del-js').click(function (event) {
@@ -63,8 +73,7 @@
         });
 
         $('#search-in-post-js').focus(function () {
-            console.log($(this).parent().find('fa-search'));
-            $(this).parent().find('fa-search').css('color', '#fe4f4f !important');
+            $(this).parent().css('border-color', '#fe4f4f');
         });
 
     </script>

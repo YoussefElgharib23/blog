@@ -3,10 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Entity\Ip;
 use App\Entity\Post;
 use App\Form\CategoryFormType;
 use App\Form\PostFormType;
 use App\Repository\CategoryRepository;
+use App\Repository\IpRepository;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -41,16 +43,23 @@ class AdminController extends AbstractController
      * @var FlashyNotifier
      */
     private $flashyNotifier;
+    /**
+     * @var IpRepository
+     */
+    private $ipRepository;
 
-    public function __construct(FlashyNotifier $flashyNotifier, EntityManagerInterface $em, CategoryRepository $categoryRepository, PostRepository $postRepository)
+    public function __construct(IpRepository $ipRepository, FlashyNotifier $flashyNotifier, EntityManagerInterface $em, CategoryRepository $categoryRepository, PostRepository $postRepository)
     {
         $this->em = $em;
         $this->categoryRepository = $categoryRepository;
         $this->postRepository = $postRepository;
         $this->flashyNotifier = $flashyNotifier;
+        $this->ipRepository = $ipRepository;
     }
 
     /**
+     * GET ALL THE POSTS OR GET THE POST BY THE TITLE GIVEN IN THE SEARCH BOX
+     *
      * @Route("/", name="index", methods={"GET", "POST"})
      * @param Request $request
      * @return Response
@@ -60,7 +69,15 @@ class AdminController extends AbstractController
         $post     = ( new Post() )->setViews(0);
         $category = new Category();
 
-        $posts        = $this->postRepository->findBy([], ['created_at' => 'DESC']);
+        $posts        = [];
+        $action['action'] = 'request';
+        if ($request->getMethod() === 'POST' AND $request->request->has('_title') && trim($request->request->get('_title')) !== '') {
+            $posts = $this->postRepository->findBy(['title' => $request->request->get('_title')]);
+            $action['action'] = 'search';
+            $action['search_var'] = $request->request->get('_title');
+            if (count($posts) === 0) $this->flashyNotifier->error('No results found you can create new one !');
+        }
+        elseif (trim($request->request->get('_title')) === '' OR $request->getMethod() !== 'POST') $posts = $this->postRepository->findBy([], ['created_at' => 'DESC']);
         $categories   = $this->categoryRepository->findBy([], ['created_at' => 'DESC']);
         $postForm     = $this->createForm(PostFormType::class, $post);
         $categoryForm = $this->createForm(CategoryFormType::class, $category);
@@ -81,20 +98,28 @@ class AdminController extends AbstractController
             'posts' => $posts,
             'categories' => $categories,
             'postForm' => $postForm->createView(),
-            'categoryForm' => $categoryForm->createView()
+            'categoryForm' => $categoryForm->createView(),
+            'action' => $action
         ]);
     }
 
     /**
      * SHOW THE POST BY ID
      *
-     * @Route("/posts/{slug}-{id}", name="post_show", methods={"GET"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
+     * @Route("/posts/{slug}-{id}", name="post_show", methods={"GET", "POST"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
+     * @param Request $request
      * @param Post $post
      * @return Response
      * @throws NonUniqueResultException
      */
-    public function showPost(Post $post): Response
+    public function showPost(Request $request, Post $post): Response
     {
+        if (NULL === $this->ipRepository->findOneBy(['ipAddress' => $request->getClientIp()])) {
+            $post->incrementViews();
+            $userType =  $this->isGranted('ROLE_ADMIN') ? 'ADMIN' : 'USER';
+            $this->em->persist(( new Ip() )->setIpAddress($request->getClientIp())->setIpType($userType));
+        }
+        $this->em->flush();
         $relatedPost = $this->postRepository->findRelatedPost($post);
         $categories = $this->categoryRepository->findAll();
         $previousPosts = $this->postRepository->previousPosts($post, $relatedPost);
