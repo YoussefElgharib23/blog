@@ -69,15 +69,21 @@ class AdminController extends AbstractController
         $post     = ( new Post() )->setViews(0);
         $category = new Category();
 
-        $posts        = [];
+        $posts = [];
         $action['action'] = 'request';
         if ($request->getMethod() === 'POST' AND $request->request->has('_title') && trim($request->request->get('_title')) !== '') {
-            $posts = $this->postRepository->findBy(['title' => $request->request->get('_title')]);
+            $titleSearch = strtolower(trim($request->request->get('_title')));
+            $posts = $this->postRepository->findBy(['title' => $titleSearch]);
             $action['action'] = 'search';
             $action['search_var'] = $request->request->get('_title');
-            if (count($posts) === 0) $this->flashyNotifier->error('No results found you can create new one !');
+            if (count($posts) === 0) {
+                $this->flashyNotifier->error('No results found you can create new one !');
+                return $this->redirectToRoute('app_admin_index');
+            }
         }
-        elseif (trim($request->request->get('_title')) === '' OR $request->getMethod() !== 'POST') $posts = $this->postRepository->findBy([], ['created_at' => 'DESC']);
+        elseif (trim($request->request->get('_title')) === '' OR $request->getMethod() !== 'POST') {
+            $posts = $this->postRepository->findBy([], ['created_at' => 'DESC']);
+        }
         $categories   = $this->categoryRepository->findBy([], ['created_at' => 'DESC']);
         $postForm     = $this->createForm(PostFormType::class, $post);
         $categoryForm = $this->createForm(CategoryFormType::class, $category);

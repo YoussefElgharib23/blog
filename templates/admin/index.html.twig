@@ -3,14 +3,14 @@
 {% block title 'Admin page' %}
 
 {% block body %}
+    {{ include('layouts/_dashboard_navbar.html.twig') }}
     <div class="container">
-        {{ include('layouts/_dashboard_navbar.html.twig') }}
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                 <p class="mt-3">
                     <a href="#" id="show-hide-f-js" class="mt-2 link-c"><i class="fas fa-eye"></i>
                         <span class="i-text-js"><span id="word-js">{{ posts | length > 0  ? 'Show' : 'Hide' }}</span> create form</span>
-                        <i class="fa fa-angle-up" style="position: relative; top: 2px; transform: rotate({{ posts | length > 0 ? '180' : '0' }}deg)" ></i>
+                        <i class="fa fa-angle-up" style="position: relative; top: 1px; transform: rotate({{ posts | length > 0 ? '180' : '0' }}deg)" ></i>
                     </a>
                 </p>
                 <div class="row">
@@ -30,13 +30,61 @@
                 <div class="row mb-4">
                     <div class="col-md-6 mx-auto">
                         <h1 class="text-center my-4">Create new category</h1>
+                        {{ form_start(categoryForm) }}
+                        {{ form_widget(categoryForm) }}
+                        <input type="submit" class="btn btn-block btn-outline-success">
+                        {{ form_start(categoryForm) }}
                     </div>
                 </div>
                 <hr>
+                {% if categories | length == 0 %}
+                <div class="mt-4 alert alert-danger text-center" role="alert">Sorry No Category ! <br> Try add new
+                    <a href="{{ path('app_category_create') }}">one</a>
+                </div>
+                {% else %}
+                <h2 class="text-center my-4">List category</h1>
+                    <div class="form-inline my-2" style="position: relative;">
+                        <i class="fa fa-search text-muted" style="position: relative;z-index: 100;"></i>
+                        <input type="text" id="search-in-js" placeholder="Search for category" >
+                    </div>
+                    <div class="t-d-n-js">
+                        <table class="mt-3 table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Created At</th>
+                                <th>Latest update</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="result-category-search-js">
+                            {% for category in categories %}
+                                <tr>
+                                    <td>{{ category.name }}</td>
+                                    <td>{{ category.createdAt | date('M d, Y') }}</td>
+                                    <td>{{ category.updatedAt | date('M d, Y') }}</td>
+                                    <td>
+                                        <a href="{{ path('app_category_edit', {id: category.id }) }}" class="btn btn-outline-info btn-sm">
+                                            <i class="fa fa-pen"></i>
+                                            Edit
+                                        </a>
+                                        <a class="btn btn-outline-danger btn-sm" id="delete-link-js">
+                                            <i class="fa fa-trash"></i>
+                                            <span id="cat-id" style="display: none;">{{ category.id }}</span>
+                                            Delete
+                                        </a>
+                                        {{ include('category/shared/_form_delete.html.twig') }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
-
+    {{ include('layouts/_footer.html.twig') }}
 {% endblock %}
 
 {% block javascripts %}
@@ -76,5 +124,14 @@
             $(this).parent().css('border-color', '#fe4f4f');
         });
 
+    </script>
+    <script>
+        document.querySelectorAll('a#delete-link-js').forEach(function (element) {
+            let catId = element.querySelector('span#cat-id').textContent;
+            element.addEventListener('click', function (event) {
+                event.preventDefault();
+                element.parentElement.querySelector('form#form-delete-category-js-' + catId).submit();
+            });
+        });
     </script>
 {% endblock %}

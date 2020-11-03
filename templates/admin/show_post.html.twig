@@ -58,12 +58,16 @@
                    </span>
                </small>
                <h1>{{ post.title }}</h1>
-               <img src="{{ post.imageLink }}" class="img-fluid rounded" alt="">
+               <img src="{{ post.imageLink }}" class="w-100 rounded" alt="">
+               <h2 class="text-center my-3">Description</h2>
+               <p class="font-weight-bolder">
+                   {{ post.description }}
+               </p>
            </div>
            <div class="col-lg-3" style="margin: 38px 0;">
                 <h3 class="text-center text-muted">Related post</h3>
                <article class="art-r">
-                   <a href="{{ path('app_admin_post_show', {id: relatedPost.id, slug: relatedPost.slug}) }}"><img src="{{ relatedPost.imageLink }}" class="img-fluid rounded s-i" alt=""></a>
+                   <a href="{{ path('app_admin_post_show', {id: relatedPost.id, slug: relatedPost.slug}) }}"><img src="{{ relatedPost.imageLink }}" class="w-100 rounded s-i" alt=""></a>
                    <small><span class="c-n-article">{{ relatedPost.category.name }}</span> - {{ relatedPost.createdAt | date('M d, Y') }}</small>
                    <h6><a href="" class="link-c">{{ relatedPost.title }}</a></h6>
                </article>
@@ -71,9 +75,6 @@
                    <h5 class="text-muted">Categories</h5>
                    <ul class="cat-list">
                        {% for category in categories %}
-                            <li class="c-link-preview"><a href="" class="link-c">{{ category.name }}</a></li>
-                            <li class="c-link-preview"><a href="" class="link-c">{{ category.name }}</a></li>
-                            <li class="c-link-preview"><a href="" class="link-c">{{ category.name }}</a></li>
                             <li class="c-link-preview"><a href="" class="link-c">{{ category.name }}</a></li>
                        {% endfor %}
                    </ul>

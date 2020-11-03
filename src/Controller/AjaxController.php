@@ -35,15 +35,14 @@ class AjaxController extends AbstractController
      */
     public function search(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $name = $data['Name'];
+        $name = NULL !== json_decode($request->getContent(), true) ? json_decode($request->getContent(), true)['Name'] : $request->request->get('name');
         $categories = $this->repository->findAll();
         $foundCategory = [];
         if ($name !== "") {
             $name = strtolower($name);
             $len = strlen($name);
             foreach($categories as $category) {
-                if (stristr($name, substr(strtolower($category->getName()), 0, $len))) {
+                if (stristr($name, substr(strtolower($category->getName()), 0, $len)) AND $len <= strlen($category->getName())) {
                     $foundCategory[] = $category;
                 }
             }
@@ -52,7 +51,7 @@ class AjaxController extends AbstractController
             $foundCategory = $categories;
         }
 
-        return $this->json($foundCategory);
+        return $this->json($foundCategory, 200, [], ['groups' => "category:search"]);
     }
 
     /**
@@ -75,7 +74,6 @@ class AjaxController extends AbstractController
             {
                 if (stristr($title, substr(strtolower($post->getTitle()), 0, $len))) $foundedPosts[] = $post;
             }
-
 
             return $this->json($foundedPosts , 200, [], ['groups' => 'post:ajax']);
         }

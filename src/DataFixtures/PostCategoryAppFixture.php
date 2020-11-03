@@ -20,6 +20,8 @@ class PostCategoryAppFixture extends Fixture implements FixtureGroupInterface
             $category = new Category();
             $category
                 ->setName($faker->words(mt_rand(1, 3), true))
+                ->setCreatedAt(new \DateTimeImmutable())
+                ->setUpdatedAt(new \DateTimeImmutable())
                 ;
             $categories[] = $category;
 

@@ -255,3 +255,11 @@ img.s-i:hover {
         font-size: 40px;
     }
 }
+
+.link-c-i {
+    color: #8d8d8d;
+}
+
+.link-c-i:hover {
+    @extend .link-c;
+}
