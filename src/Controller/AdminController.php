@@ -78,7 +78,7 @@ class AdminController extends AbstractController
             $action['search_var'] = $request->request->get('_title');
             if (count($posts) === 0) {
                 $this->flashyNotifier->error('No results found you can create new one !');
-                return $this->redirectToRoute('app_admin_index');
+                return $this->redirectToRoute(self::INDEX_ROUTE);
             }
         }
         elseif (trim($request->request->get('_title')) === '' OR $request->getMethod() !== 'POST') {
@@ -100,12 +100,28 @@ class AdminController extends AbstractController
             return $this->redirectToRoute(self::INDEX_ROUTE);
         }
 
+        if ($categoryForm->isSubmitted() AND $categoryForm->isValid()) {
+            $this->em->persist($category);
+            $this->em->flush();
+            $this->flashyNotifier->success('The category was created with successfully');
+
+            return $this->redirectToRoute(self::INDEX_ROUTE);
+        }
+
+        // FOR STATISTICS PANEL
+        $count = $this->postRepository->count([]);
+        $views = 0;
+        foreach ($this->postRepository->findAll() as $post) $views += $post->getViews();
+
         return $this->render('admin/index.html.twig', [
             'posts' => $posts,
             'categories' => $categories,
             'postForm' => $postForm->createView(),
             'categoryForm' => $categoryForm->createView(),
-            'action' => $action
+            'action' => $action,
+            'cm' => 'dashboard',
+            'PostCount' => $count,
+            'views' => $views
         ]);
     }
 

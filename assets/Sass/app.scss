@@ -180,7 +180,7 @@
     padding: 10px;
 }
 
-.btn {
+.c-btn {
     border: none;
 }
 
@@ -262,4 +262,9 @@ img.s-i:hover {
 
 .link-c-i:hover {
     @extend .link-c;
+}
+
+.dashboard-card {
+    height: 155px;
+    background-color: darkred;
 }
