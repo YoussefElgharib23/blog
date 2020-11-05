@@ -75,10 +75,6 @@
             }
         });
 
-        $('*#btn-del-js').click(function (event) {
-            event.preventDefault();
-            $(this).parent().find('form').submit();
-        });
 
         $('#search-in-post-js').focus(function () {
             $(this).parent().css('border-color', '#fe4f4f');
@@ -90,8 +86,12 @@
             let catId = element.querySelector('span#cat-id').textContent;
             element.addEventListener('click', function (event) {
                 event.preventDefault();
-                element.parentElement.querySelector('form#form-delete-category-js-' + catId).submit();
+                if (confirm('Are you sure you wanna delete the category ?')) {
+                    element.parentElement.querySelector('form#form-delete-category-js-' + catId).submit();
+                }
             });
         });
     </script>
+
+    {{ include('interaction/_notification.html.twig') }}
 {% endblock %}

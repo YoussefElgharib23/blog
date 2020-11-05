@@ -1,5 +1,5 @@
 <form id="form-delete-category-js-{{ category.id }}" action="{{ path('app_category_delete', {id: category.id}) }}"
-    method="POST" style="display: none;" onsubmit="return confirm('Are you sure you wanna delete the category !')">
+    method="POST" style="display: none;">
     <input type="hidden" name="_method" value="DELETE">
     <input type="hidden" name="_token" value="{{ csrf_token('delete_category' ~ category.id) }}">
 </form>

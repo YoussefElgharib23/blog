@@ -251,8 +251,8 @@ img.s-i:hover {
 }
 
 @media (max-width: 992px) {
-    ._font-40-sm {
-        font-size: 40px;
+    ._font-20-sm {
+        font-size: 20px;
     }
 }
 
@@ -267,4 +267,27 @@ img.s-i:hover {
 .dashboard-card {
     height: 155px;
     background-color: darkred;
+}
+
+#notifications-js-count {
+    position: absolute;
+    top: 3px;
+    right: 0;
+    font-size: 11px;
+    background: #ff00009c;
+    color: white;
+    border-radius: 75%;
+    padding: 2px;
+    width: 18px;
+    height: 18px;
+    text-align: center;
+}
+
+.not-time {
+    background-color: #e5e5e5;
+    color: #414141;
+    border-radius: 30px;
+    padding: 3px;
+    font-size: 13px;
+    border-bottom: 1px solid #a9a9a978;
 }

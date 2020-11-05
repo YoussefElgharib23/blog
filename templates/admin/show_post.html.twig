@@ -67,9 +67,11 @@
            <div class="col-lg-3" style="margin: 38px 0;">
                 <h3 class="text-center text-muted">Related post</h3>
                <article class="art-r">
-                   <a href="{{ path('app_admin_post_show', {id: relatedPost.id, slug: relatedPost.slug}) }}"><img src="{{ relatedPost.imageLink }}" class="w-100 rounded s-i" alt=""></a>
+                   <a href="{{ path('app_admin_post_show', {id: relatedPost.id, slug: relatedPost.slug}) }}">
+                       <img src="{{ relatedPost.imageLink }}" class="w-100 rounded s-i" alt="">
+                   </a>
                    <small><span class="c-n-article">{{ relatedPost.category.name }}</span> - {{ relatedPost.createdAt | date('M d, Y') }}</small>
-                   <h6><a href="" class="link-c">{{ relatedPost.title }}</a></h6>
+                   <h6 class="_font-20-sm"><a href="" class="link-c">{{ relatedPost.title }}</a></h6>
                </article>
                <div class="category-available mt-5">
                    <h5 class="text-muted">Categories</h5>
@@ -81,16 +83,16 @@
                </div>
                {% if previousPosts | length > 0 %}
                    <div class="pr-posts mt-5">
-                       <h5 class="text-muted">Previous posts</h5>
+                       <h5 class="text-muted">You may like</h5>
                        {% for row in previousPosts | batch(2) %}
                             {% for previousPost in row %}
-                                <div class="row p-0 m-0 align-items-center overflow-hidden">
+                                <div class="row p-0 mb-2 align-items-center overflow-hidden">
                                    <div class="col-6 d-flex justify-content-center">
                                        <img class="article-img-pre rounded img-fluid" src="{{ previousPost.imageLink }}" alt="">
                                    </div>
                                    <div class="col-6" style="line-height: normal;">
                                        <small><span class="c-n-article">{{ previousPost.category.name }}</span> - {{ previousPost.createdAt | date('M d, Y') }}</small>
-                                       <h6 class="_font-40-sm">
+                                       <h6 class="_font-20-sm">
                                            <a href="" class="link-c">{{ previousPost.title }}</a>
                                        </h6>
                                    </div>
@@ -102,4 +104,8 @@
            </div>
        </div>
    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ include('interaction/_notification.html.twig') }}
 {% endblock %}
