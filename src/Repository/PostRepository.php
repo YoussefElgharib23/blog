@@ -50,7 +50,7 @@ class PostRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('p')
             ->andWhere('p.title != :val')
             ->setParameter('val', $post->getTitle())
-            ->orderBy('p.created_at', 'DESC')
+            ->orderBy('p.id', 'DESC')
             ->getQuery()
             ->getResult()
         ;

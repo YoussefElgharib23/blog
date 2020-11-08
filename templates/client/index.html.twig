@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title "Blog" %}
+
+{% block body %}
+    {{ include('client/_shared.html.twig') }}
+    {# START FIRST POST LAYOUT #}
+    <div class="container mt-4 rounded">
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <a href="{{ path('app_client_show_post', {'id': firstPost.id, 'slug': firstPost.slug}) }}">
+                    <img alt="" class="mw-100 rounded-lg" src="{{ firstPost.imageLink }}">
+                </a>
+            </div>
+            <div class="col-md-6 mt-2">
+                <small>
+                    <span class="cat">{{ firstPost.category.name }}</span> - <span class="text-muted">{{ firstPost.createdAt | date('M d, Y') }}</span>
+                </small>
+                <h1><a href="{{ path('app_client_show_post', {'id': firstPost.id, 'slug': firstPost.slug}) }}" class="link-c">{{ firstPost.title }}</a></h1>
+                <p>
+                    {{ firstPost.description | u.truncate(140, '...', false) }}
+                </p>
+                <a class="btn btn-sm btn-red" href="{{ path('app_client_show_post', {'id': firstPost.id, 'slug': firstPost.slug}) }}"
+                   role="button">Read more</a>
+            </div>
+        </div>
+        {# END FIRST POST LAYOUT #}
+        {# START POSTS LAYOUT #}
+        <h2 class="my-4 text-muted text-center">Posts</h2>
+        {% for row in posts | batch(4) %}
+            <div class="row">
+                {% for post in row %}
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="article-img-link">
+                            <img class="rounded-lg img-fluid" src="{{ post.imageLink }}"  alt="">
+                        </a>
+                        <small>
+                            <span class="cat">{{ post.category.name }}</span>
+                        </small>
+                        <h5 class="_font-25-sm">
+                            <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="link-c">{{ post.title }}</a>
+                        </h5>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    {# END POSTS LAYOUT #}
+{% endblock %}
+
+{% block javascripts %}
+    {% if app.user and is_granted('ROLE_ADMIN') %}
+        {{ include('interaction/_notification.html.twig') }}
+    {% endif %}
+{% endblock %}

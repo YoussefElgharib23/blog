@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Traits\TimeStamps;
+use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\Collection;
@@ -26,18 +27,24 @@ class Category
      * @ORM\Column(type="integer")
      * @Groups("category:search")
      */
-    private $id;
+    private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups("category:search")
      */
-    private $name;
+    private ?string $name;
 
     /**
      * @ORM\OneToMany(targetEntity=Post::class, mappedBy="category", orphanRemoval=true)
      */
     private $posts;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string")
+     */
+    private string $slug;
 
     public function __construct()
     {
@@ -89,5 +96,30 @@ class Category
         }
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSlug(): string
+    {
+        return $this->slug;
+    }
+
+    /**
+     * @param string $slug
+     */
+    public function setSlug(string $slug): void
+    {
+        $this->slug = $slug;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     * @ORM\PreUpdate()
+     */
+    public function setSlugPersistUpdate()
+    {
+       $this->setSlug(( new Slugify() )->slugify($this->getName()));
     }
 }

@@ -3,10 +3,12 @@
 namespace App\Controller;
 
 use App\Repository\CategoryRepository;
+use App\Repository\NotificationRepository;
 use App\Repository\PostRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class AjaxController extends AbstractController
@@ -14,16 +16,21 @@ class AjaxController extends AbstractController
     /**
      * @var CategoryRepository
      */
-    private $repository;
+    private CategoryRepository $repository;
     /**
      * @var PostRepository
      */
-    private $postRepository;
+    private PostRepository $postRepository;
+    /**
+     * @var NotificationRepository
+     */
+    private NotificationRepository $notificationRepository;
 
-    public function __construct(CategoryRepository $repository, PostRepository $postRepository)
+    public function __construct(NotificationRepository $notificationRepository, CategoryRepository $repository, PostRepository $postRepository)
     {
         $this->repository = $repository;
         $this->postRepository = $postRepository;
+        $this->notificationRepository = $notificationRepository;
     }
 
     /**
@@ -79,5 +86,21 @@ class AjaxController extends AbstractController
         }
 
         return $this->json($posts , 200, [], ['groups' => 'post:ajax']);
+    }
+
+    /**
+     * @Route("/admin/notifcations/get", name="get_notifications", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function getNotifications(): JsonResponse
+    {
+        $notifications = $this->notificationRepository->findBy(['IsViewed' => false], ['id' => 'DESC']);
+        $todayNotifications = [];
+        $previousNotifications = [];
+        foreach ($notifications as $notification) {
+            if (date_format($notification->getCreatedAt(), 'd') === date('d')) $todayNotifications[] = $notification;
+            else $previousNotifications = $notification;
+        }
+        return $this->json(['notViewedNotifications' => $notifications, 'previousNotifications' => $previousNotifications, 'todayNotifications' => $todayNotifications]);
     }
 }

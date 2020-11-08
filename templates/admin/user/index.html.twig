@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'List users' %}
+
+{% block body %}
+
+    <div class="container">
+        <h1 class="my-4 text-center text-secondary">List users</h1>
+        <table class="table table-hover shadow rounded-lg p-3">
+            <thead class="bg-dark text-light rounded-lg">
+                <tr>
+                    <th>Id</th>
+                    <th>Full name</th>
+                    <th>Account Status</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.fullName }}</td>
+                    <td>{{ user.status }}</td>
+                    <td>{{ user.createdAt | date('M d, Y') }}</td>
+                    <td>
+                        <a href="" class="btn btn-sm btn-danger">Suspend</a>
+                        <a href="" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

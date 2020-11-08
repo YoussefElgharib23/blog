@@ -1,29 +1,34 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="{{ path('app_admin_index') }}">BlogHome</a>
+<nav class="navbar navbar-expand-lg navbar-dark shadow-lg" style="overflow: hidden; position: fixed; width: 100%; top: 0; z-index: 1000; background-color: black !important;">
+    <a class="navbar-brand" href="{{ path('app_client_index') }}">BlogHome</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-            {% if app.user %}
+            {% if app.user and is_granted('ROLE_ADMIN') %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_admin_index') }}">Admin</a>
+                    <a class="nav-link -nav-link-c" href="{{ path('app_admin_index') }}">Admin</a>
                 </li>
                 <li class="nav-item" style="position: relative">
-                    <a href="{{ path('app_admin_notifications_index') }}" class="nav-link">Notifications</a>
-                    <span id="notifications-js-count" style="display: none"></span>
+                    <a href="{{ path('app_admin_notifications_index') }}" class="nav-link -nav-link-c">Notifications</a>
+                    <span
+                        id="notifications-js-count" {% if countNotification is defined and countNotification > 0 %} style="display: block" {% else %} style="display: none" {% endif %}
+                        >{{ countNotification ?? '' }}</span>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('app_admin_user_index') }}" class="nav-link -nav-link-c">Users</a>
                 </li>
             {% endif %}
         </ul>
         <ul class="navbar-nav ml-auto">
             {% if app.user %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_logout') }}">Logout</a>
+                    <a class="nav-link -nav-link-c" href="{{ path('app_logout') }}">Logout</a>
                 </li>
             {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_login') }}">Login</a>
+                    <a class="nav-link -nav-link-c" href="{{ path('app_login') }}">Login</a>
                 </li>
             {% endif %}
         </ul>

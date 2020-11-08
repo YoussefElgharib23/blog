@@ -29,7 +29,7 @@ class Notification
     private $createdAt;
 
     /**
-     * @ORM\Column(type="boolean", options={"defaults": false})
+     * @ORM\Column(type="boolean")
      */
     private $IsViewed;
 

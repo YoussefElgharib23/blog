@@ -3,6 +3,7 @@
 {% block title 'Login to your account' %}
 
 {% block body %}
+    {{ include('client/_shared.html.twig') }}
     <div class="container">
         <div class="row">
             <div class="col-md-6 mx-auto">
@@ -36,7 +37,7 @@
                 </form>
 
                 <p class="mt-4 text-center text-muted">Not have an account ? Try
-                    <a href="" class="text-decoration-none" style="color: #fe4f4f">sign up</a>
+                    <a href="{{ path('app_register') }}" class="text-decoration-none" style="color: #fe4f4f">sign up</a>
                 </p>
             </div>
         </div>

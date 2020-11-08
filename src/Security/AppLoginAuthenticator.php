@@ -6,8 +6,10 @@ use App\Entity\Ip;
 use App\Entity\User;
 use App\Repository\IpRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -36,14 +38,19 @@ class AppLoginAuthenticator extends AbstractFormLoginAuthenticator implements Pa
      * @var IpRepository
      */
     private IpRepository $repository;
+    /**
+     * @var FlashyNotifier
+     */
+    private FlashyNotifier $flashyNotifier;
 
-    public function __construct(IpRepository $repository, EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(FlashyNotifier $flashyNotifier, IpRepository $repository, EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->entityManager = $entityManager;
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
         $this->repository = $repository;
+        $this->flashyNotifier = $flashyNotifier;
     }
 
     public function supports(Request $request)
@@ -99,6 +106,12 @@ class AppLoginAuthenticator extends AbstractFormLoginAuthenticator implements Pa
         return $credentials['password'];
     }
 
+    /**
+     * @param Request $request
+     * @param TokenInterface $token
+     * @param string $providerKey
+     * @return RedirectResponse|Response|null
+     */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)
     {
         $ip = ( new Ip() )->setIpAddress($request->getClientIp())->setIpType('ADMIN');
@@ -107,11 +120,13 @@ class AppLoginAuthenticator extends AbstractFormLoginAuthenticator implements Pa
             $this->entityManager->flush();
         }
 
+        $this->flashyNotifier->success('You are logged as ' . $token->getUser()->getFullName());
+
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
             return new RedirectResponse($targetPath);
         }
-        dd('Good');
-         return new RedirectResponse($this->urlGenerator->generate('app_index'));
+
+         return new RedirectResponse($this->urlGenerator->generate('app_client_index'));
     }
 
     protected function getLoginUrl()

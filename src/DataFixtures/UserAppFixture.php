@@ -28,6 +28,7 @@ class UserAppFixture extends Fixture implements FixtureGroupInterface
             ->setLastName('El Gharib')
             ->setEmail('Youssef@example.com')
             ->setRoles(['ROLE_ADMIN'])
+            ->setStatus('active')
             ->setPassword($this->encoder->encodePassword($user, 'Password'))
         ;
 

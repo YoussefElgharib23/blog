@@ -1,0 +1,161 @@
+{% extends 'base.html.twig' %}
+
+{% block title post.slug | capitalize %}
+
+{% block body %}
+    <style>
+        body {
+            background-color: #f5f5f5 !important;
+        }
+
+        div.container, .container-fluid {
+            background-color: white;
+            border-left: 1px solid #e1e1e1;
+            border-right: 1px solid #e1e1e1;
+            border-top: 1px solid #e3e3e3;
+        }
+        footer.container {
+            background-color: white;
+            border-left: 1px solid #e1e1e1;
+            border-right: 1px solid #e1e1e1;
+        }
+
+        .category-item {
+            background-color: #eaeaea8f;
+            border-bottom: 1px solid #cccccc;
+            border-radius: 5px;
+            padding: 2px;
+            font-size: 14px;
+        }
+
+        </style>
+    <div class="container mt-4 rounded">
+        <div class="row mt-4">
+            {# START MAIN POST #}
+            <div class="col-lg-8">
+                <article>
+                    <small class="d-flex justify-content-between align-items-center">
+                        <span>
+                            <span class="cat">{{ post.category.name }}</span> - <span class="text-muted">{{ post.createdAt | date('M d, y') }}</span>
+                        </span>
+                        <span class="cat">
+                            <span class="comment-count">0</span>
+                            <i class="far fa-comment"></i>
+                        </span>
+                    </small>
+                    <h1 class="article-title">{{ post.title }}</h1>
+                    <div class="article-image">
+                        <img src="{{ post.imageLink }}" class="rounded-lg w-100" alt="">
+                    </div>
+                    <section class="mt-4 description-article">
+                        <h2 class="text-center">Description</h2>
+                        <p>{{ post.description }}</p>
+                    </section>
+                </article>
+                {# START COMMENT SYSTEM #}
+                <div class="comments mt-3 mb-3">
+                    {% if app.user %}
+                        <div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
+                            <div class="d-flex align-items-center">
+                                <span class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
+                                      title="username"></span>
+                                <small class="ml-2 text-muted">Nov 12, 2020 12:03 PM</small>
+                            </div>
+                            <p>
+                                nisi, ratione, repudiandae. Aperiam deserunt id mollitia, quidem quod recusandae!
+                            </p>
+                        </div>
+                        <textarea name="" id="" cols="30" rows="3" class="form-control" placeholder="Your comment"></textarea>
+                        <input type="submit" value="Post comment" class="btn btn-outline-success btn-block mt-2">
+                    {% else %}
+                        <div class="text-center alert alert-danger">
+                            You are logged anonymously <br>
+                            Please <a href="{{ path('app_login') }}">login</a> to post your comment
+                        </div>
+                    {% endif %}
+                </div>
+                {# END COMMENT SYSTEM #}
+                <div class="pre-next-article">
+                    <small class="d-flex justify-content-between">
+                        {% if previousPost %}
+                            <a href="{{ path('app_client_show_post', {'id': previousPost.id, 'slug': previousPost.slug}) }}" class="link-c">
+                                <i class="fa fa-angle-left"></i>
+                                Previous post
+                            </a>
+                        {% else %}
+                            <span class="text-muted" style="cursor: not-allowed">
+                                <i class="fa fa-angle-left"></i>
+                                Previous post
+                            </span>
+                        {% endif %}
+                        {% if nextPost %}
+                            <a href="{{ path('app_client_show_post', {'id': nextPost.id, 'slug': nextPost.slug}) }}" class="link-c">
+                                Next post
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-muted" style="cursor: not-allowed" title="no more post">
+                                Next post
+                                <i class="fa fa-angle-right"></i>
+                            </span>
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+            {# END MAIN POST #}
+            <div class="col-lg-4 mt-5">
+                {# RELATED POST #}
+                <article>
+                    <h3 class="text-muted text-center">Related post</h3>
+                    <div class="img-article-preview">
+                        <img src="{{ relatedPost.imageLink }}" class="rounded-lg mw-100" alt="">
+                    </div>
+                    <small>
+                        <span class="cat">{{ relatedPost.category.name }}</span> -
+                        <span class="text-muted">{{ relatedPost.createdAt | date('M d, Y') }}</span>
+                    </small>
+                    <h4 style="font-size: 20px;">
+                        <a class="link-c"
+                           href="{{ path('app_client_show_post', {'id': relatedPost.id, 'slug': relatedPost.slug}) }}">{{ relatedPost.title }}</a>
+                    </h4>
+                </article>
+                {# END RELATED POST #}
+                {# LIST CATEGORY #}
+                <div class="mt-4">
+                    <h4 class="text-muted">Categories</h4>
+                    <ul class="category-nav p-0 m-0" style="list-style: none; display: flex; flex-wrap: wrap;">
+                    {% for category in categories %}
+                            <li class="category-item mr-2 mb-1">
+                                <a href="{{ path('app_client_posts_category_search', {'slug': category.slug}) }}" class="link-c">{{ category.name }}</a>
+                            </li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {# END LIST CATEGORY #}
+                {# LIST MAY LIKE POSTS #}
+                <div class="mt-4 y-m-liked">
+                    <h4 class="text-muted">You also may like</h4>
+                    {% for post in mayLikePosts %}
+                        <div class="row mb-2 _width-400-sm w-300">
+                            <div class="col-6">
+                                <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="link-c">
+                                    <img class="img-fluid rounded-lg" src="{{ post.imageLink }}" alt="">
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-article-category" style="font-size: 11px">
+                                    <span class="cat">{{ post.category.name }}</span><br>
+                                    <span class="text-muted">{{ post.createdAt | date('M d, Y') }}</span>
+                                </div>
+                                <h6 class="_font-20-sm">
+                                    <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="link-c">{{ post.title }}</a>
+                                </h6>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {# END LIST MAY LIKE POSTS #}
+            </div>
+        </div>
+    </div>
+{% endblock %}

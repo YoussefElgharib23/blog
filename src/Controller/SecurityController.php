@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,8 +17,11 @@ class SecurityController extends AbstractController
      */
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-         if ($this->getUser()) {
+         if ($this->getUser() AND $this->isGranted('ROLE_ADMIN')) {
              return $this->redirectToRoute('app_admin_index');
+         }
+         elseif ($this->getUser() AND $this->isGranted('ROLE_USER')) {
+            return $this->redirectToRoute('app_client_index');
          }
 
         // get the login error if there is one
@@ -30,8 +34,10 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/logout", name="app_logout")
+     * @param FlashyNotifier $flashyNotifier
      */
-    public function logout()
+    public function logout(FlashyNotifier $flashyNotifier)
     {
+        $flashyNotifier->success('You are logged out !');
     }
 }

@@ -1,27 +1,27 @@
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
+{#<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>#}
+{#<script>#}
 
-    async function checkNewNotifications () {
-        let url = 'https://127.0.0.1:8000/admin/notifcations/get';
+{#    async function checkNewNotifications () {#}
+{#        let url = 'https://127.0.0.1:8000/admin/notifcations/get';#}
 
-        axios.get(url)
-            .then(function (results) {
-                console.log(results.data['todayNotifications'].length);
-                let countSpan = $('#notifications-js-count'),
-                    countNot = results.data.length;
-                if ( countNot > 0) {
-                    countSpan.css('display', 'block');
-                    if ( parseInt(countSpan.text()) !== results.data['todayNotifications'].length ) {
-                        countSpan.text(results.data['todayNotifications'].length);
-                    }
-                }
-                else {
-                    countSpan.css('display', 'none');
-                    countSpan.text('');
-                }
-            })
-            .catch(function (error) { console.log(error.message); });
-    }
+{#        axios.post(url)#}
+{#            .then(function (results) {#}
+{#                let countSpan = $('#notifications-js-count'),#}
+{#                    countNot = results.data['notViewedNotifications'].length;#}
 
-    setInterval(checkNewNotifications, 1000);
-</script>
+{#                if ( countNot > 0) {#}
+{#                    countSpan.css('display', 'block');#}
+{#                    if ( parseInt(countSpan.text()) !== results.data['notViewedNotifications'].length ) {#}
+{#                        countSpan.text(results.data['notViewedNotifications'].length);#}
+{#                    }#}
+{#                }#}
+{#                else {#}
+{#                    countSpan.css('display', 'none');#}
+{#                    countSpan.text('');#}
+{#                }#}
+{#            })#}
+{#            .catch(function (error) { console.log(error.message); });#}
+{#    }#}
+
+{#    setInterval(checkNewNotifications, 1000);#}
+{#</script>#}
