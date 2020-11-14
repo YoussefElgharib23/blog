@@ -31,6 +31,7 @@ class Post
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups("post:ajax")
+     * @Groups("ajax:notifications")
      */
     private $title;
 

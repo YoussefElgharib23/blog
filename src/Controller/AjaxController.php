@@ -179,9 +179,16 @@ class AjaxController extends AbstractController
      * @Route("/notifications/get", methods={"POST"})
      * @return JsonResponse
      */
-    public function getUnseenNotifications()
+    public function getUnseenNotifications(): JsonResponse
     {
-        $notifications =$this->notificationRepository->findBy(['IsViewed' => false]);
-        return $this->json(['notifications' => $notifications]);
+        $notifications =$this->notificationRepository->findBy([], ['createdAt' => 'DESC']);
+        $returnedNotifications = [];
+        foreach ($notifications as $notification)
+            if (date_format($notification->getCreatedAt(), 'd') === date('d'))
+                $returnedNotifications[] = $notification;
+        return $this->json($returnedNotifications
+            , 200, [], [
+            'groups' => 'ajax_notifications'
+        ]);
     }
 }

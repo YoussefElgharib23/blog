@@ -1,13 +1,12 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-    function getNewNotifications()
+    function getNewNotifications(from, length)
     {
-        let url = "https://blog.wip/notifications/get",
+        let url = "https://127.0.0.1:8000/notifications/get",
             notificationsHtml = $('#tbody-new-notifications-ajax');
         axios.post(url, {})
         .then(function (response) {
-            console.log(response.data);
-            notificationsHtml.append()
+            console.log(response.data[0]);
         });
     }
 

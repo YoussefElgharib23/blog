@@ -20,7 +20,7 @@
                     {% for notification in todayNotifications %}
                         <tr>
                             <td>
-                                <span class="not-time">{{ notification.createdAt | date('H:i a') }}</span>
+                                <span class="not-time">{{ notification.createdAt | date('H:i') }}</span>
                                 <br>
                                 <p style="display: inline">
                                     {% if notification.user is not null %}

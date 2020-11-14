@@ -16,19 +16,19 @@ class Notification
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups("ajax:notifications")
+     * @Groups("ajax_notifications")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("ajax:notifications")
+     * @Groups("ajax_notifications")
      */
     private $description;
 
     /**
      * @ORM\Column(type="datetime")
-     * @Groups("ajax:notifications")
+     * @Groups("ajax_notifications")
      */
     private $createdAt;
 
@@ -39,11 +39,13 @@ class Notification
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="notifications")
+     * @Groups("ajax_notifications")
      */
     private $User;
 
     /**
      * @ORM\ManyToOne(targetEntity=Post::class, inversedBy="notifications")
+     * @Groups("ajax_notifications")
      */
     private $Post;
 
