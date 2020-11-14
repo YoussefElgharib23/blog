@@ -8,6 +8,7 @@ use App\Entity\Post;
 use App\Form\CategoryFormType;
 use App\Form\PostFormType;
 use App\Repository\CategoryRepository;
+use App\Repository\CommentRepository;
 use App\Repository\IpRepository;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,31 +31,36 @@ class AdminController extends AbstractController
     /**
      * @var EntityManagerInterface
      */
-    private $em;
+    private EntityManagerInterface $em;
     /**
      * @var CategoryRepository
      */
-    private $categoryRepository;
+    private CategoryRepository $categoryRepository;
     /**
      * @var PostRepository
      */
-    private $postRepository;
+    private PostRepository $postRepository;
     /**
      * @var FlashyNotifier
      */
-    private $flashyNotifier;
+    private FlashyNotifier $flashyNotifier;
     /**
      * @var IpRepository
      */
-    private $ipRepository;
+    private IpRepository $ipRepository;
+    /**
+     * @var CommentRepository
+     */
+    private CommentRepository $commentRepository;
 
-    public function __construct(IpRepository $ipRepository, FlashyNotifier $flashyNotifier, EntityManagerInterface $em, CategoryRepository $categoryRepository, PostRepository $postRepository)
+    public function __construct(CommentRepository $commentRepository, IpRepository $ipRepository, FlashyNotifier $flashyNotifier, EntityManagerInterface $em, CategoryRepository $categoryRepository, PostRepository $postRepository)
     {
         $this->em = $em;
         $this->categoryRepository = $categoryRepository;
         $this->postRepository = $postRepository;
         $this->flashyNotifier = $flashyNotifier;
         $this->ipRepository = $ipRepository;
+        $this->commentRepository = $commentRepository;
     }
 
     /**
@@ -111,8 +117,7 @@ class AdminController extends AbstractController
         // FOR STATISTICS PANEL
         $count = $this->postRepository->count([]);
         $views = 0;
-        foreach ($this->postRepository->findAll() as $post) $views += $post->getViews();
-
+        foreach ( $posts as $post) $views += $post->getViews();
         return $this->render('admin/index.html.twig', [
             'posts' => $posts,
             'categories' => $categories,
@@ -121,6 +126,7 @@ class AdminController extends AbstractController
             'action' => $action,
             'cm' => 'dashboard',
             'PostCount' => $count,
+            'commentCount' => count($this->commentRepository->findAll()),
             'views' => $views
         ]);
     }
@@ -136,7 +142,7 @@ class AdminController extends AbstractController
      */
     public function showPost(Request $request, Post $post): Response
     {
-        if (NULL === $this->ipRepository->findOneBy(['ipAddress' => $request->getClientIp()])) {
+        if ( NULL === $this->ipRepository->findOneBy(['ipAddress' => $request->getClientIp()]) ) {
             $post->incrementViews();
             $userType =  $this->isGranted('ROLE_ADMIN') ? 'ADMIN' : 'USER';
             $this->em->persist(( new Ip() )->setIpAddress($request->getClientIp())->setIpType($userType));
@@ -145,8 +151,11 @@ class AdminController extends AbstractController
         $relatedPost = $this->postRepository->findRelatedPost($post);
         $categories = $this->categoryRepository->findAll();
         $previousPosts = $this->postRepository->previousPosts($post, $relatedPost);
+
+
+
         return $this->render('admin/show_post.html.twig', [
-            'post' => $post,
+            'post' => $post, 
             'relatedPost' => $relatedPost,
             'categories' => $categories,
             'previousPosts' => $previousPosts

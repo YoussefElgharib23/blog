@@ -3,11 +3,21 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Entity\Comment;
+use App\Entity\Ip;
+use App\Entity\Notification;
 use App\Entity\Post;
+use App\Entity\User;
+use App\Form\CommentTypeFormType;
 use App\Repository\CategoryRepository;
+use App\Repository\CommentRepository;
+use App\Repository\IpRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\PostRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -25,12 +35,42 @@ class ClientController extends AbstractController
      * @var NotificationRepository
      */
     private NotificationRepository $notificationRepository;
+    /**
+     * @var EntityManagerInterface
+     */
+    private EntityManagerInterface $entityManager;
+    /**
+     * @var FlashyNotifier
+     */
+    private FlashyNotifier $flashyNotifier;
+    /**
+     * @var CommentRepository
+     */
+    private CommentRepository $commentRepository;
+    /**
+     * @var IpRepository
+     */
+    private IpRepository $ipRepository;
 
-    public function __construct(PostRepository $postRepository, CategoryRepository $categoryRepository, NotificationRepository $notificationRepository)
+    /**
+     * ClientController constructor.
+     * @param IpRepository $ipRepository
+     * @param CommentRepository $commentRepository
+     * @param FlashyNotifier $flashyNotifier
+     * @param EntityManagerInterface $entityManager
+     * @param PostRepository $postRepository
+     * @param CategoryRepository $categoryRepository
+     * @param NotificationRepository $notificationRepository
+     */
+    public function __construct(IpRepository $ipRepository, CommentRepository $commentRepository, FlashyNotifier $flashyNotifier, EntityManagerInterface $entityManager, PostRepository $postRepository, CategoryRepository $categoryRepository, NotificationRepository $notificationRepository)
     {
         $this->postRepository = $postRepository;
         $this->categoryRepository = $categoryRepository;
         $this->notificationRepository = $notificationRepository;
+        $this->entityManager = $entityManager;
+        $this->flashyNotifier = $flashyNotifier;
+        $this->commentRepository = $commentRepository;
+        $this->ipRepository = $ipRepository;
     }
 
     private const TEMPLATE_PATH_CLIENT = 'client/';
@@ -40,28 +80,71 @@ class ClientController extends AbstractController
      */
     public function index()
     {
-        $countNotification = null;
-        if ( $this->getUser() AND in_array('ROLE_ADMIN', $this->getUser()->getRoles()) ) {
-            $countNotification = count($this->notificationRepository->findBy(['IsViewed' => false]));
-        }
         $firstPost = $this->postRepository->findOneBy([], ['id' => 'DESC']);
         $posts = $this->postRepository->findExcept($firstPost);
         return $this->render(self::TEMPLATE_PATH_CLIENT.'/index.html.twig', [
             'firstPost'         => $firstPost,
-            'posts'             => $posts,
-            'countNotification' => $countNotification
+            'posts'             => $posts
         ]);
     }
 
     /**
-     * @Route("/{slug}-{id}", name="app_client_show_post", methods={"GET"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
+     * @Route("/{slug}-{id}", name="app_client_show_post", methods={"GET", "POST"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
+     * @param Request $request
      * @param Post $post
      * @param string $slug
      * @return Response
      */
-    public function showPost(Post $post, string $slug): Response
+    public function showPost(Request $request, Post $post, string $slug): Response
     {
-        if ( $slug !== $post->getSlug()) return $this->redirectToRoute('app_client_show_post', ['id' => $post->getId(), 'slug' => $post->getSlug()]);
+        if ( $slug !== $post->getSlug() ) return $this->redirectToRoute('app_client_show_post', ['id' => $post->getId(), 'slug' => $post->getSlug()]);
+
+        // ADD THE VIEWS ALSO THE CLIENT IP TO THE DATABASE AND STORE THE CHANGES
+        if ( $this->getUser() AND in_array('ROLE_USER', $this->getUser()->getRoles()) ) {
+            $post->setViews( $post->getViews() + 1 );
+            $this->entityManager->persist($post);
+
+            $ip = ( new Ip() )->setIpType('USER')->setIpAddress( $request->getClientIp() );
+            if ( NULL === $this->ipRepository->findOneBy(['ipAddress' => $ip->getIpAddress()]) ) {
+                $this->entityManager->persist($ip);
+            }
+            $this->entityManager->flush();
+        }
+
+        // IF A USER IS CONNECTED CREATE NEW COMMENT FORM AND PASS IT TO THE VIEW
+        $currentUser = $this->getUser();
+        if ( $currentUser !== NULL ) {
+            $comment = ( new Comment() )->setPost($post)->setUser($currentUser);
+            $formComment = $this->createForm(CommentTypeFormType::class, $comment);
+        }
+
+        if ( isset($formComment) ) $formComment->handleRequest($request);
+
+        if ( isset($formComment) && $formComment->isSubmitted() && $formComment->isValid() ) {
+            $this->entityManager->persist($comment);
+
+            if ( in_array('ROLE_USER', $currentUser->getRoles()) ) {
+                $notification = new Notification();
+                $notification
+                    ->setIsViewed(false)
+                    ->setUser($currentUser)
+                    ->setPost($post)
+                    ->setDescription(' commented on post')
+                ;
+                $this->entityManager->persist($notification);
+            }
+
+            $this->entityManager->flush();
+            $this->flashyNotifier->success('The comment was posted with successfully !');
+
+            return $this->redirectToRoute('app_client_show_post', [
+                'id' => $post->getId(),
+                'slug' => $post->getSlug()
+            ]);
+        }
+
+        $postComments = $this->commentRepository->findBy(['post' => $post], ['id' => 'DESC']);
+
         // GET PREVIOUS, NEXT POST
         $previousPost = $this->postRepository->findOneBy(['id' => $post->getId() - 1]);
         $nextPost = $this->postRepository->findOneBy(['id' => $post->getId() + 1]);
@@ -78,25 +161,45 @@ class ClientController extends AbstractController
         $categories = $this->categoryRepository->findAll();
 
         // GET MAY LIKE POST
-        $fId = $this->postRepository->findOneBy([])->getId();
-        $lId = $this->postRepository->findOneBy([], ['id' => 'DESC'])->getId();
         $ids = [];
         $mayLikePosts = [];
         for ($i = 0; $i < 5; $i++) {
         sfi:
-            $id = $this->postRepository->findOneBy(['id' => mt_rand($fId, $lId)])->getId();
+            $id = $this->postRepository->findOneBy(['id' => mt_rand($firstPostId, $lastPostId)])->getId();
             if ( in_array($id, $ids) OR $id === $post->getId() OR $id === $relatedPost->getId() ) goto sfi;
             $ids[] = $id;
             $mayLikePosts[] = $this->postRepository->findOneBy(['id' => $id]);
         }
 
+        // DELETE COMMENT
+        if ( $request->getMethod() === 'POST' and $this->isCsrfTokenValid('delete_comment', $request->request->get('_token')) )
+        {
+            $commentToDelete = $this->commentRepository->find($request->request->get('_comment_id'));
+            $notifications = $this->notificationRepository->findBy(['Post' => $commentToDelete->getPost(), 'User' => $commentToDelete->getUser()]);
+            $this->denyAccessUnlessGranted('deleteComment', $commentToDelete);
+            $this->entityManager->remove($commentToDelete);
+            foreach ($notifications as $notification) {
+                $this->entityManager->remove($notification);
+            }
+            $this->entityManager->flush();
+
+            $this->flashyNotifier->success('The comment was deleted with success !');
+
+            return $this->redirectToRoute('app_client_show_post', [
+                'id'   => $post->getId(),
+                'slug' => $post->getSlug()
+            ]);
+        }
+
         return $this->render('client/show.html.twig', [
-            'post' => $post,
+            'post'         => $post,
             'previousPost' => $previousPost,
-            'nextPost' => $nextPost,
-            'relatedPost' => $relatedPost,
-            'categories' => $categories,
-            'mayLikePosts' => $mayLikePosts
+            'nextPost'     => $nextPost,
+            'relatedPost'  => $relatedPost,
+            'categories'   => $categories,
+            'mayLikePosts' => $mayLikePosts,
+            'formComment'  => isset($formComment) ? $formComment->createView() : null,
+            'postComment'  => $postComments
         ]);
     }
 

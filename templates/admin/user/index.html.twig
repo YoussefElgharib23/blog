@@ -1,36 +1,154 @@
+{# THIS IS THE VIEW WHERE WE SHOW ALL THE USE TO THE ADMIN #}
 {% extends 'base.html.twig' %}
 
 {% block title 'List users' %}
 
 {% block body %}
 
+    <style>
+        .form-control {
+            border: none;
+            border-bottom: 1px solid #d1d1d1;
+            border-radius: 0;
+            padding: 0;
+            height: auto;
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+        }
+    </style>
+
     <div class="container">
         <h1 class="my-4 text-center text-secondary">List users</h1>
-        <table class="table table-hover shadow rounded-lg p-3">
-            <thead class="bg-dark text-light rounded-lg">
-                <tr>
-                    <th>Id</th>
-                    <th>Full name</th>
-                    <th>Account Status</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for user in users %}
-                <tr>
-                    <td>{{ user.id }}</td>
-                    <td>{{ user.fullName }}</td>
-                    <td>{{ user.status }}</td>
-                    <td>{{ user.createdAt | date('M d, Y') }}</td>
-                    <td>
-                        <a href="" class="btn btn-sm btn-danger">Suspend</a>
-                        <a href="" class="btn btn-sm btn-danger">Delete</a>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <form action="{{ path('app_admin_user_search_user') }}" method="POST">
+            <div class="form-group">
+                <label class="form-inline">
+                    <input type="text" class="form-control" name="_username" placeholder="Search for user" value="{{ username ?? '' }}">
+                    <button type="submit" class="btn-xm-block btn btn-outline-info btn-sm ml-2 mt-xm-2">
+                        <i class="fa fa-search"></i> Search
+                    </button>
+                </label>
+            </div>
+        </form>
+        {% if username is not defined %}
+            <table class="table table-hover shadow rounded-lg p-3">
+                <thead class="bg-dark text-light rounded-lg">
+                    <tr>
+                        <th>Id</th>
+                        <th>Full name</th>
+                        <th>Account Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in activeUsers %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.fullName }}</td>
+                        <td>{{ user.status }}</td>
+                        <td>{{ user.createdAt | date('M d, Y') }}</td>
+                        <td>
+                            <div class="row">
+                                <div class="col-md-6 mb-xm">
+                                    <a href="#" class="btn btn-sm btn-block btn-success">Active</a>
+                                </div>
+                                <div class="col-md-6 mb-xm">
+                                    <a class="btn btn-sm btn-block btn-danger"
+                                       href="{{ path('app_admin_user_delete', {'id': user.id}) }}">Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% for user in suspendedUsers %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.fullName }}</td>
+                        <td>{{ user.status }}</td>
+                        <td>{{ user.createdAt | date('M d, Y') }}</td>
+                        <td>
+                            <div class="row">
+                                <div class="col-6">
+                                    <a href="#" class="btn btn-sm btn-success btn-block">Active</a>
+                                </div>
+                                <div class="col-6">
+                                    <a class="btn btn-sm btn-block btn-danger"
+                                       href="{{ path('app_admin_user_delete', {'id': user.id}) }}">Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% for user in deletedUsers %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.fullName }}</td>
+                        <td>{{ user.status }}</td>
+                        <td>{{ user.createdAt | date('M d, Y') }}</td>
+                        <td class="row">
+                            <div class="col-md-6 mb-xm">
+                                <a href="#" class="btn btn-sm btn-success btn-block">Active</a>
+                            </div>
+                            <div class="col-md-6">
+                                <a class="btn btn-sm btn-block btn-danger"
+                                   href="{{ path('app_admin_user_delete_force', {'id': user.id}) }}"
+                                   id="delete_user_permanently_js">Delete permanently</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% elseif username is defined and user is not null %}
+            <h3 class="text-center my-2 mb-4">Result for {{ username }}</h3>
+            <table class="table table-hover shadow rounded-lg p-3">
+                <thead class="bg-dark text-light rounded-lg">
+                    <tr>
+                        <th>Id</th>
+                        <th>Full name</th>
+                        <th>Account Status</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.fullName }}</td>
+                        <td>{{ user.status }}</td>
+                        <td>{{ user.createdAt | date('M d, Y') }}</td>
+                        <td>
+                            <div class="row">
+                                <div class="col-md-6 mb-xm">
+                                    <a href="#" class="btn btn-sm btn-block btn-success">Active</a>
+                                </div>
+                                <div class="col-md-6 mb-xm">
+                                    <a class="btn btn-sm btn-block btn-danger"
+                                       href="{{ path('app_admin_user_delete', {'id': user.id}) }}">Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-warning text-center my-3">No results !</div>
+            <p class="text-center">
+                <a href="{{ path('app_admin_user_index') }}" class="text-muted">Go back</a>
+            </p>
+        {% endif %}
     </div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        $('#delete_user_permanently_js').click(function (event) {
+            if ( !confirm('Are you sur you wanna delete the user permanently ?') ) event.preventDefault();
+        });
+    </script>
 
 {% endblock %}

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\NotificationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
@@ -15,16 +16,19 @@ class Notification
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups("ajax:notifications")
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups("ajax:notifications")
      */
     private $description;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Groups("ajax:notifications")
      */
     private $createdAt;
 
@@ -32,6 +36,16 @@ class Notification
      * @ORM\Column(type="boolean")
      */
     private $IsViewed;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="notifications")
+     */
+    private $User;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Post::class, inversedBy="notifications")
+     */
+    private $Post;
 
     public function getId(): ?int
     {
@@ -78,6 +92,30 @@ class Notification
     public function setIsViewed(bool $IsViewed): self
     {
         $this->IsViewed = $IsViewed;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->User;
+    }
+
+    public function setUser(?User $User): self
+    {
+        $this->User = $User;
+
+        return $this;
+    }
+
+    public function getPost(): ?Post
+    {
+        return $this->Post;
+    }
+
+    public function setPost(?Post $Post): self
+    {
+        $this->Post = $Post;
 
         return $this;
     }

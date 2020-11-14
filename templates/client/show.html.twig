@@ -3,32 +3,7 @@
 {% block title post.slug | capitalize %}
 
 {% block body %}
-    <style>
-        body {
-            background-color: #f5f5f5 !important;
-        }
-
-        div.container, .container-fluid {
-            background-color: white;
-            border-left: 1px solid #e1e1e1;
-            border-right: 1px solid #e1e1e1;
-            border-top: 1px solid #e3e3e3;
-        }
-        footer.container {
-            background-color: white;
-            border-left: 1px solid #e1e1e1;
-            border-right: 1px solid #e1e1e1;
-        }
-
-        .category-item {
-            background-color: #eaeaea8f;
-            border-bottom: 1px solid #cccccc;
-            border-radius: 5px;
-            padding: 2px;
-            font-size: 14px;
-        }
-
-        </style>
+    {{ include('client/shared/_style.html.twig') }}
     <div class="container mt-4 rounded">
         <div class="row mt-4">
             {# START MAIN POST #}
@@ -36,16 +11,42 @@
                 <article>
                     <small class="d-flex justify-content-between align-items-center">
                         <span>
-                            <span class="cat">{{ post.category.name }}</span> - <span class="text-muted">{{ post.createdAt | date('M d, y') }}</span>
+                            <span class="cat">{{ post.category.name }}</span> -
+                            <span class="text-muted">{{ post.createdAt | date('M d, y') }}</span>
                         </span>
                         <span class="cat">
-                            <span class="comment-count">0</span>
+                            <span class="comment-count">{{ post.comments.count }}</span>
                             <i class="far fa-comment"></i>
+                            <span>{{ post.likes | length }}</span>
+                            <i class="far fa-thumbs-up"></i>
+                            <span></span>
+                            <i class="far fa-thumbs-down" style="position:relative; top: 1px;"></i>
                         </span>
                     </small>
                     <h1 class="article-title">{{ post.title }}</h1>
                     <div class="article-image">
                         <img src="{{ post.imageLink }}" class="rounded-lg w-100" alt="">
+                    </div>
+                    <div class="likes-post my-2">
+                        {% if app.user %}
+                            <a href="#" class="link-c" id="like-js-post">
+                                {% if app.user and post.isLikedByUser(app.user) %}
+                                    <i class="fas fa-thumbs-up"></i>
+                                {% else %}
+                                    <i class="far fa-thumbs-up"></i>
+                                {% endif %}
+                                <span id="post-likes-js-count">{{ post.likes | length }}</span>
+                            </a>
+                        {% else %}
+                            <span class="link-c" style="cursor: not-allowed" title="You need to log in">
+                                <i class="far fa-thumbs-up"></i>
+                                <span id="post-likes-js-count">{{ post.likes | length }}</span>
+                            </span>
+                        {% endif %}
+                        <a href="" class="link-c">
+                            <i class="far fa-thumbs-down"></i>
+                            <span>10</span>
+                        </a>
                     </div>
                     <section class="mt-4 description-article">
                         <h2 class="text-center">Description</h2>
@@ -53,20 +54,48 @@
                     </section>
                 </article>
                 {# START COMMENT SYSTEM #}
+                <h3 class="text-muted">Comments</h3>
                 <div class="comments mt-3 mb-3">
-                    {% if app.user %}
-                        <div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
-                            <div class="d-flex align-items-center">
-                                <span class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
-                                      title="username"></span>
-                                <small class="ml-2 text-muted">Nov 12, 2020 12:03 PM</small>
+                    {% for comment in postComment %}
+                        {% if not (comment.user.status == 'deleted' or comment.user.status == 'suspended') %}
+                            <div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <small class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
+                                               title="{{ comment.user.fullName }}"></small>
+                                        <span class="ml-2">{{ comment.user.fullName }}</span>
+                                        {% if 'ROLE_ADMIN' in comment.user.roles %}
+                                            <span class="admin-pre-comment">
+                                        <span style="position:relative; top: -1px;">admin</span>
+                                    </span>
+                                        {% endif %}
+                                    </div>
+                                    <small class="ml-2 text-muted">{{ comment.createdAt | date('M d, Y H:i a') }}</small>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center" style="display: inline-flex">
+                                    <p class="m-0">{{ comment.content }}</p>
+                                    {% if app.user and is_granted('ROLE_ADMIN') %}
+                                        <form action="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" method="POST">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
+                                            <input type="hidden" name="_comment_id" value="{{ comment.id }}">
+                                            <input type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 12px;" value="Delete">
+                                        </form>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <p>
-                                nisi, ratione, repudiandae. Aperiam deserunt id mollitia, quidem quod recusandae!
-                            </p>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center alert alert-danger">No comments !<br>
+                            {% if app.user %}
+                                Be first and post new comment
+                            {% endif %}
                         </div>
-                        <textarea name="" id="" cols="30" rows="3" class="form-control" placeholder="Your comment"></textarea>
+                    {% endfor %}
+                    {% if app.user %}
+                        {{ form_start(formComment) }}
+                        {{ form_widget(formComment) }}
                         <input type="submit" value="Post comment" class="btn btn-outline-success btn-block mt-2">
+                        {{ form_end(formComment) }}
                     {% else %}
                         <div class="text-center alert alert-danger">
                             You are logged anonymously <br>
@@ -75,6 +104,7 @@
                     {% endif %}
                 </div>
                 {# END COMMENT SYSTEM #}
+                {# PREVIOUS NEXT POST SECTION #}
                 <div class="pre-next-article">
                     <small class="d-flex justify-content-between">
                         {% if previousPost %}
@@ -102,22 +132,27 @@
                     </small>
                 </div>
             </div>
+            {# END PREVIOUS NEXT POST SECTION #}
             {# END MAIN POST #}
             <div class="col-lg-4 mt-5">
                 {# RELATED POST #}
-                <article>
-                    <h3 class="text-muted text-center">Related post</h3>
-                    <div class="img-article-preview">
-                        <img src="{{ relatedPost.imageLink }}" class="rounded-lg mw-100" alt="">
+                <h3 class="text-muted text-center">Related post</h3>
+                <article class="d-flex flex-column align-items-center">
+                    <div class="article-info-section">
+                        <div class="img-article-preview d-flex justify-content-between">
+                            <img src="{{ relatedPost.imageLink }}" class="rounded-lg mw-100" alt="">
+                        </div>
+                        <div>
+                            <small>
+                                <span class="cat">{{ relatedPost.category.name }}</span> -
+                                <span class="text-muted">{{ relatedPost.createdAt | date('M d, Y') }}</span>
+                            </small>
+                            <h4 style="font-size: 20px;">
+                                <a class="link-c"
+                                   href="{{ path('app_client_show_post', {'id': relatedPost.id, 'slug': relatedPost.slug}) }}">{{ relatedPost.title }}</a>
+                            </h4>
+                        </div>
                     </div>
-                    <small>
-                        <span class="cat">{{ relatedPost.category.name }}</span> -
-                        <span class="text-muted">{{ relatedPost.createdAt | date('M d, Y') }}</span>
-                    </small>
-                    <h4 style="font-size: 20px;">
-                        <a class="link-c"
-                           href="{{ path('app_client_show_post', {'id': relatedPost.id, 'slug': relatedPost.slug}) }}">{{ relatedPost.title }}</a>
-                    </h4>
                 </article>
                 {# END RELATED POST #}
                 {# LIST CATEGORY #}
@@ -126,7 +161,8 @@
                     <ul class="category-nav p-0 m-0" style="list-style: none; display: flex; flex-wrap: wrap;">
                     {% for category in categories %}
                             <li class="category-item mr-2 mb-1">
-                                <a href="{{ path('app_client_posts_category_search', {'slug': category.slug}) }}" class="link-c">{{ category.name }}</a>
+                                <a class="link-c"
+                                   href="{{ path('app_client_posts_category_search', {'slug': category.slug}) }}">{{ category.name }}</a>
                             </li>
                     {% endfor %}
                     </ul>
@@ -148,7 +184,8 @@
                                     <span class="text-muted">{{ post.createdAt | date('M d, Y') }}</span>
                                 </div>
                                 <h6 class="_font-20-sm">
-                                    <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="link-c">{{ post.title }}</a>
+                                    <a class="link-c"
+                                       href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}">{{ post.title }}</a>
                                 </h6>
                             </div>
                         </div>
@@ -158,4 +195,29 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+
+        $('a#like-js-post').mouseover(function () {
+        });
+
+        $('#like-js-post').click(function (event) {
+            event.preventDefault();
+            let url = 'https://blog.wip/nisi-laborum-ut-201/like'
+            axios.post(url,{}
+            ).then(function (response) {
+                let likeCount = response.data['likeCount'];
+                $('#post-likes-js-count').text(likeCount);
+                if ( response.data['message'] === '-1')
+                    $('.fa-thumbs-up').toggleClass('far', 'fas');
+                else
+                    $('.fa-thumbs-up').toggleClass('fas', 'far');
+            })
+            .catch(function (error) { console.log(error.message); });
+        });
+
+    </script>
+
 {% endblock %}

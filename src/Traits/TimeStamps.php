@@ -7,32 +7,15 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 trait TimeStamps
 {
-
     /**
      * @ORM\Column(type="datetime", options={"defaults": "CURRENT_TIMESTAMP"})
-     * @Groups("category:search")
      */
     private $created_at;
 
     /**
      * @ORM\Column(type="datetime", options={"default": "CURRENT_TIMESTAMP"})
-     * @Groups("category:search")
      */
     private $updated_at;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=false)
-     * @Groups("category:search")
-     */
-    private $formattedCreatedAt;
-
-    /**
-     * @var string
-     * @ORM\Column(type="string", nullable=false)
-     * @Groups("category:search")
-     */
-    private $formattedUpdatedAt;
 
     public function getCreatedAt(): ?\DateTimeInterface
     {
@@ -66,39 +49,5 @@ trait TimeStamps
     {
         if ( $this->getCreatedAt() === NULL ) $this->setCreatedAt(new \DateTimeImmutable());
         $this->setUpdatedAt(new \DateTimeImmutable());
-        $this->setFormattedCreatedAt(date_format($this->getCreatedAt(), 'M d, Y'));
-        $this->setFormattedUpdatedAt(date_format($this->getUpdatedAt(), 'M d, Y'));
-    }
-
-    /**
-     * @return string
-     */
-    public function getFormattedCreatedAt(): ?string
-    {
-        return $this->formattedCreatedAt;
-    }
-
-    /**
-     * @param string $formattedCreatedAt
-     */
-    public function setFormattedCreatedAt(string $formattedCreatedAt): void
-    {
-        $this->formattedCreatedAt = $formattedCreatedAt;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFormattedUpdatedAt(): ?string
-    {
-        return $this->formattedUpdatedAt;
-    }
-
-    /**
-     * @param string $formattedUpdatedAt
-     */
-    public function setFormattedUpdatedAt(string $formattedUpdatedAt): void
-    {
-        $this->formattedUpdatedAt = $formattedUpdatedAt;
     }
 }

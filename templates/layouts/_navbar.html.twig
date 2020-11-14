@@ -12,9 +12,7 @@
                 </li>
                 <li class="nav-item" style="position: relative">
                     <a href="{{ path('app_admin_notifications_index') }}" class="nav-link -nav-link-c">Notifications</a>
-                    <span
-                        id="notifications-js-count" {% if countNotification is defined and countNotification > 0 %} style="display: block" {% else %} style="display: none" {% endif %}
-                        >{{ countNotification ?? '' }}</span>
+                    <span id="notifications-js-count" style="display: none"></span>
                 </li>
                 <li class="nav-item">
                     <a href="{{ path('app_admin_user_index') }}" class="nav-link -nav-link-c">Users</a>

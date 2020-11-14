@@ -16,13 +16,23 @@
             <div class="t-notifications">
                 <h2 class="mt-4">Today</h2>
                 <table class="table">
-                    <tbody>
+                    <tbody id="tbody-new-notifications-ajax">
                     {% for notification in todayNotifications %}
                         <tr>
                             <td>
                                 <span class="not-time">{{ notification.createdAt | date('H:i a') }}</span>
                                 <br>
-                                <p style="display: inline">{{ notification.description }}</p>
+                                <p style="display: inline">
+                                    {% if notification.user is not null %}
+                                        <span href="" class="link-c">{{ notification.user.fullName }}</span>
+                                    {% endif %}
+                                    <span>{{ notification.description }}</span>
+                                    {% if notification.post is not null %}
+                                        <a class="link-c" href="{{ path('app_client_show_post', {'id': notification.post.id, 'slug': notification.post.slug}) }}">
+                                            {{ notification.post.title }}
+                                        </a>
+                                    {% endif %}
+                                </p>
                             </td>
                         </tr>
                     {% endfor %}
@@ -42,9 +52,20 @@
                     {% for notification in previousNotifications %}
                         <tr>
                             <td>
-                                <span class="not-time">{{ notification.createdAt | date('H:i a') }}</span>
+                                <span class="not-time">{{ notification.createdAt | date('H:i a | M d, Y') }}</span>
                                 <br>
-                                <p style="display: inline">{{ notification.description }}</p>
+                                <p style="display: inline">
+                                    {% if notification.user is not null %}
+                                        <a href="" class="link-c">{{ notification.user.fullName }}</a>
+                                    {% endif %}
+                                    <span>{{ notification.description }}</span>
+                                    {% if notification.post is not null %}
+                                        <a class="link-c"
+                                           href="{{ path('app_client_show_post', {'id': notification.post.id , 'slug': notification.post.slug}) }}">
+                                            {{ notification.post.title }}
+                                        </a>
+                                    {% endif %}
+                                </p>
                             </td>
                         </tr>
                     {% endfor %}

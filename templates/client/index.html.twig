@@ -3,7 +3,7 @@
 {% block title "Blog" %}
 
 {% block body %}
-    {{ include('client/_shared.html.twig') }}
+    {{ include('client/shared/_style.html.twig') }}
     {# START FIRST POST LAYOUT #}
     <div class="container mt-4 rounded">
         <div class="row mt-4">
@@ -14,9 +14,14 @@
             </div>
             <div class="col-md-6 mt-2">
                 <small>
-                    <span class="cat">{{ firstPost.category.name }}</span> - <span class="text-muted">{{ firstPost.createdAt | date('M d, Y') }}</span>
+                    <span class="cat">
+                        {{ firstPost.category.name }}</span> - <span class="text-muted">{{ firstPost.createdAt | date('M d, Y') }}
+                    </span>
                 </small>
-                <h1><a href="{{ path('app_client_show_post', {'id': firstPost.id, 'slug': firstPost.slug}) }}" class="link-c">{{ firstPost.title }}</a></h1>
+                <h1>
+                    <a class="link-c"
+                       href="{{ path('app_client_show_post', {'id': firstPost.id, 'slug': firstPost.slug}) }}">{{ firstPost.title }}</a>
+                </h1>
                 <p>
                     {{ firstPost.description | u.truncate(140, '...', false) }}
                 </p>
@@ -36,6 +41,7 @@
                         </a>
                         <small>
                             <span class="cat">{{ post.category.name }}</span>
+                            <span class="text-muted">{{ post.createdAt | date('M d, Y') }}</span>
                         </small>
                         <h5 class="_font-25-sm">
                             <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="link-c">{{ post.title }}</a>

@@ -2,15 +2,26 @@
 
 namespace App\Controller;
 
+use App\Entity\Like;
+use App\Entity\Notification;
+use App\Entity\Post;
 use App\Repository\CategoryRepository;
+use App\Repository\LikeRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\PostRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Class AjaxController
+ * @package App\Controller
+ * @IsGranted ("ROLE_ADMIN")
+ */
 class AjaxController extends AbstractController
 {
     /**
@@ -25,12 +36,22 @@ class AjaxController extends AbstractController
      * @var NotificationRepository
      */
     private NotificationRepository $notificationRepository;
+    /**
+     * @var LikeRepository
+     */
+    private LikeRepository $likeRepository;
+    /**
+     * @var EntityManagerInterface
+     */
+    private EntityManagerInterface $entityManager;
 
-    public function __construct(NotificationRepository $notificationRepository, CategoryRepository $repository, PostRepository $postRepository)
+    public function __construct(EntityManagerInterface $entityManager, LikeRepository $likeRepository, NotificationRepository $notificationRepository, CategoryRepository $repository, PostRepository $postRepository)
     {
         $this->repository = $repository;
         $this->postRepository = $postRepository;
         $this->notificationRepository = $notificationRepository;
+        $this->likeRepository = $likeRepository;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -102,5 +123,65 @@ class AjaxController extends AbstractController
             else $previousNotifications = $notification;
         }
         return $this->json(['notViewedNotifications' => $notifications, 'previousNotifications' => $previousNotifications, 'todayNotifications' => $todayNotifications]);
+    }
+
+    /**
+     *
+     * @Route("/{slug}-{id}/like", methods={"GET", "POST"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
+     * @param Post $post
+     * @return JsonResponse
+     */
+    public function likePost(Post $post)
+    {
+        $user = $this->getUser();
+        if ( $post->isLikedByUser($user) ) {
+            $userLike = $this->likeRepository->findOneBy(['User' => $user]);
+            $post->removeLike($userLike);
+
+            $this->entityManager->remove($userLike);
+            $this->entityManager->flush();
+
+            return $this->json([
+                'code'      => 'success',
+                'message'   => '-1',
+                'likeCount' => count($post->getLikes())
+            ], 200);
+        }
+        else {
+            $like = new Like();
+            $like
+                ->setUser($user)
+                ->setPost($post)
+            ;
+            $post->addLike($like);
+
+            $this->entityManager->persist($like);
+            $this->entityManager->flush();
+        }
+        return $this->json([
+            'code'      => 'success',
+            'message'   => '+1',
+            'likeCount' => count($post->getLikes()),
+        ], 200);
+    }
+
+    /**
+     * @Route("/notification/count", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function getNotificationCount(): JsonResponse
+    {
+        $notifications = $this->notificationRepository->findBy(['IsViewed' => false]);
+        return $this->json(['count' => count($notifications)]);
+    }
+
+    /**
+     * @Route("/notifications/get", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function getUnseenNotifications()
+    {
+        $notifications =$this->notificationRepository->findBy(['IsViewed' => false]);
+        return $this->json(['notifications' => $notifications]);
     }
 }

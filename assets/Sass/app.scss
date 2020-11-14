@@ -349,3 +349,32 @@ footer.container {
 .container-fluid {
     margin-top: 70px !important;
 }
+
+.admin-pre-comment {
+    margin: 0 5px;
+    font-size: 10px;
+    background: #dddddd;
+    border-radius: 20px;
+    padding: 2px;
+    position: relative;
+    top: -9px;
+    left: -6px;
+}
+
+@media (max-width: 768px) {
+    .mb-xm {
+        margin-bottom: 5px;
+    }
+}
+
+
+@media (max-width: 576px) {
+    .mt-xm-2 {
+        margin-top: 0.5rem ;
+        margin-left: 0 !important;
+    }
+
+    .btn-xm-block {
+        width: 100%;
+    }
+}

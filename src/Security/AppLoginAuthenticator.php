@@ -88,6 +88,10 @@ class AppLoginAuthenticator extends AbstractFormLoginAuthenticator implements Pa
             throw new CustomUserMessageAuthenticationException('Invalid credentials');
         }
 
+        if ( $user->getStatus() === 'suspended' ) {
+            throw new CustomUserMessageAuthenticationException("The account was suspended ! Please check your mail box for more infos");
+        }
+
         return $user;
     }
 
@@ -132,5 +136,9 @@ class AppLoginAuthenticator extends AbstractFormLoginAuthenticator implements Pa
     protected function getLoginUrl()
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
+    }
+
+    public function logout()
+    {
     }
 }

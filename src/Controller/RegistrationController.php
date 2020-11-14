@@ -67,7 +67,7 @@ class RegistrationController extends AbstractController
 
             $entityManager->persist(
                 ( new Notification() )
-                    ->setDescription('A new user was registered')
+                    ->setDescription('A new user was registered, Full name user: ' . $user->getFullName())
                     ->setIsViewed(false)
             );
             $entityManager->flush();

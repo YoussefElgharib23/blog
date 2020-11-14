@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Delete the account ' ~ user.fullName %}
+
+{% block body %}
+
+    {{ include('admin/user/layouts/_suspendDelete.html.twig', {
+        action: 'Delete'
+    }) }}
+
+{% endblock %}

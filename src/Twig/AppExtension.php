@@ -25,8 +25,9 @@ class AppExtension extends AbstractExtension
         ];
     }
 
-    public function pluralize(int $views)
+    public function pluralize(int $number, string $word)
     {
-        return $views > 1 ? $views . " Views" : $views . " View";
+        $word = ucfirst($word);
+        return $number > 1 ? $number . ' ' . $word . 's' : $number . ' ' .$word;
     }
 }
