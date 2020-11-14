@@ -378,3 +378,17 @@ footer.container {
         width: 100%;
     }
 }
+
+.notification-js {
+    transition: transform .4s ease-in-out, opacity .4s ease-in-out;
+}
+
+.show-notification-js {
+    transform: translateY(0px);
+    opacity: 1;
+}
+
+.hide-notification-js {
+    transform: translateY(10px);
+    opacity: 0;
+}

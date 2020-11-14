@@ -62,14 +62,10 @@
                             <div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="d-flex align-items-center">
-                                        <small class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
+                                        <small class="fas {% if 'ROLE_ADMIN' in comment.user.roles %} fa-user-shield {% else %} fa fa-user {% endif %}"
+                                               style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
                                                title="{{ comment.user.fullName }}"></small>
                                         <span class="ml-2">{{ comment.user.fullName }}</span>
-                                        {% if 'ROLE_ADMIN' in comment.user.roles %}
-                                            <span class="admin-pre-comment">
-                                    <span style="position:relative; top: -1px;">admin</span>
-                                </span>
-                                        {% endif %}
                                     </div>
                                     <small class="ml-2 text-muted">{{ comment.createdAt | date('M d, Y H:i a') }}</small>
                                 </div>
@@ -93,7 +89,7 @@
                                     {% endif %}
                                 </div>
                             </div>
-                        {% endfor %}
+                    {% endfor %}
                     </div>
                     {% if app.user %}
                         <form id="form-comment-js">
@@ -202,25 +198,37 @@
             </div>
         </div>
     </div>
+    <div class="notification-flash-js">
+        <div class="not-flash alert alert-success p-2 notification-js hide-notification-js" style="position: fixed; bottom: 40px; right: 20px">
+            <span id="notification-message-js"></span>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
+        function showNotification(message) {
+            $('span#notification-message-js').text(message);
+            $('div.not-flash').toggleClass('hide-notification-js', 'show-notification-js');
+            setTimeout(function () {
+                $('div.not-flash').toggleClass('hide-notification-js', 'hide-notification-js');
+            }, 2000);
+        }
+
         $('form#form-comment-js').submit(function (event) {
             event.preventDefault();
             let commentUser = $('textarea#comment-in-js'),
                 post_id = $('input#post-id-js').val(),
                 urlComment = 'https://127.0.0.1:8000/comment/post'
-
             axios.post(urlComment, {
                 commentContent: commentUser.val(),
                 postId: post_id
             })
             .then(function (response) {
-                console.log(response.data);
                 commentUser.val('');
                 getComments();
+                showNotification('Your comment was posted with success !');
             })
             .catch(function (error) {
                 console.log(error.message);
@@ -253,7 +261,7 @@
                                 {% if app.user and is_granted('ROLE_ADMIN') %}
                                     <form action="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" method="POST">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
-                                        <input type="hidden" name="_comment_id" value="{{ comment.id }}">
+                                        <input type="hidden" name="_comment_id" value="${comment.id}">
                                         <input type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 12px;" value="Delete">
                                     </form>
                                 {% endif %}
