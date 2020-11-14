@@ -57,45 +57,52 @@
                 <h3 class="text-muted">Comments</h3>
                 <div class="comments mt-3 mb-3">
                     {% for comment in postComment %}
-                        {% if not (comment.user.status == 'deleted' or comment.user.status == 'suspended') %}
-                            <div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
-                                <div class="d-flex align-items-center justify-content-between">
-                                    <div class="d-flex align-items-center">
-                                        <small class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
-                                               title="{{ comment.user.fullName }}"></small>
-                                        <span class="ml-2">{{ comment.user.fullName }}</span>
-                                        {% if 'ROLE_ADMIN' in comment.user.roles %}
-                                            <span class="admin-pre-comment">
+                        <div id="comment-js-preview">
+                            {% if not (comment.user.status == 'deleted' or comment.user.status == 'suspended') %}
+                                <div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <small class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
+                                                   title="{{ comment.user.fullName }}"></small>
+                                            <span class="ml-2">{{ comment.user.fullName }}</span>
+                                            {% if 'ROLE_ADMIN' in comment.user.roles %}
+                                                <span class="admin-pre-comment">
                                         <span style="position:relative; top: -1px;">admin</span>
                                     </span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="ml-2 text-muted">{{ comment.createdAt | date('M d, Y H:i a') }}</small>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center" style="display: inline-flex">
+                                        <p class="m-0">{{ comment.content }}</p>
+                                        {% if app.user and is_granted('ROLE_ADMIN') %}
+                                            <form action="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" method="POST">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
+                                                <input type="hidden" name="_comment_id" value="{{ comment.id }}">
+                                                <input type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 12px;" value="Delete">
+                                            </form>
                                         {% endif %}
                                     </div>
-                                    <small class="ml-2 text-muted">{{ comment.createdAt | date('M d, Y H:i a') }}</small>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center" style="display: inline-flex">
-                                    <p class="m-0">{{ comment.content }}</p>
-                                    {% if app.user and is_granted('ROLE_ADMIN') %}
-                                        <form action="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" method="POST">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
-                                            <input type="hidden" name="_comment_id" value="{{ comment.id }}">
-                                            <input type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 12px;" value="Delete">
-                                        </form>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endif %}
-                    {% else %}
-                        <div class="text-center alert alert-danger">No comments !<br>
-                            {% if app.user %}
-                                Be first and post new comment
                             {% endif %}
+                        </div>
+                    {% else %}
+                        <div id="no-comment-js">
+                            <div class="text-center alert alert-danger">No comments !<br>
+                                {% if app.user %}
+                                    Be first and post new comment
+                                {% endif %}
+                            </div>
                         </div>
                     {% endfor %}
                     {% if app.user %}
-                        {{ form_start(formComment) }}
-                        {{ form_widget(formComment) }}
-                        <input type="submit" value="Post comment" class="btn btn-outline-success btn-block mt-2">
-                        {{ form_end(formComment) }}
+                        <form id="form-comment-js">
+                            <div class="form-group">
+                                <textarea rows="5" class="form-control" id="comment-in-js"></textarea>
+                                <input type="hidden" value="{{ post.id }}" id="post-id-js">
+                                <input type="submit" class="btn btn-block btn-outline-success mt-2" value="Comment">
+                            </div>
+                        </form>
                     {% else %}
                         <div class="text-center alert alert-danger">
                             You are logged anonymously <br>
@@ -198,6 +205,67 @@
 {% endblock %}
 
 {% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        $('form#form-comment-js').submit(function (event) {
+            event.preventDefault();
+            let commentUser = $('textarea#comment-in-js'),
+                post_id = $('input#post-id-js').val(),
+                urlComment = 'https://127.0.0.1:8000/comment/post'
+
+            axios.post(urlComment, {
+                commentContent: commentUser.val(),
+                postId: post_id
+            })
+            .then(function (response) {
+                console.log(response.data);
+                commentUser.val('');
+                getComments();
+            })
+            .catch(function (error) {
+                console.log(error.message);
+            });
+        });
+
+        function getComments()
+        {
+            let url = 'https://127.0.0.1:8000/comment/get';
+            axios.get(url, {})
+            .then(function (response) {
+                let comments = response.data;
+                let commentHtml = $('#comment-js-preview');
+                $('div#no-comment-js').remove();
+                comments.forEach(function (comment) {
+                    console.log(comment);
+                    commentHtml.html(
+                        `<div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <small class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
+                                           title="${comment.user.fullName}"></small>
+                                    <span class="ml-2">${comment.user.fullName}</span>
+                                </div>
+                                <small class="ml-2 text-muted">${comment.created_at}</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center" style="display: inline-flex">
+                                <p class="m-0">${comment.content}</p>
+                                {% if app.user and is_granted('ROLE_ADMIN') %}
+                                    <form action="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" method="POST">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
+                                        <input type="hidden" name="_comment_id" value="{{ comment.id }}">
+                                        <input type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 12px;" value="Delete">
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>`
+                    );
+                });
+            })
+            .catch(function (error) {
+                console.log(error.message);
+            });
+        }
+    </script>
     <script>
 
         $('a#like-js-post').mouseover(function () {
@@ -205,7 +273,7 @@
 
         $('#like-js-post').click(function (event) {
             event.preventDefault();
-            let url = 'https://blog.wip/nisi-laborum-ut-201/like'
+            let url = 'https://127.0.0.1:8000/nisi-laborum-ut-201/like'
             axios.post(url,{}
             ).then(function (response) {
                 let likeCount = response.data['likeCount'];

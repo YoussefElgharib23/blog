@@ -198,7 +198,7 @@ class ClientController extends AbstractController
             'relatedPost'  => $relatedPost,
             'categories'   => $categories,
             'mayLikePosts' => $mayLikePosts,
-            'formComment'  => isset($formComment) ? $formComment->createView() : null,
+          //'formComment'  => isset($formComment) ? $formComment->createView() : null,
             'postComment'  => $postComments
         ]);
     }

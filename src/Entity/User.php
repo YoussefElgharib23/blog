@@ -26,6 +26,7 @@ class User implements UserInterface
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      * @Groups("ajax_notifications")
+     * @Groups("ajax:comment")
      */
     private $id;
 
@@ -83,6 +84,7 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups("ajax_notifications")
+     * @Groups("ajax:comment")
      */
     private $fullName;
 
