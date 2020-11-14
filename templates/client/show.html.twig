@@ -56,45 +56,45 @@
                 {# START COMMENT SYSTEM #}
                 <h3 class="text-muted">Comments</h3>
                 <div class="comments mt-3 mb-3">
+                    <div id="comment-js-preview">
                     {% for comment in postComment %}
-                        <div id="comment-js-preview">
-                            {% if not (comment.user.status == 'deleted' or comment.user.status == 'suspended') %}
-                                <div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                            <small class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
-                                                   title="{{ comment.user.fullName }}"></small>
-                                            <span class="ml-2">{{ comment.user.fullName }}</span>
-                                            {% if 'ROLE_ADMIN' in comment.user.roles %}
-                                                <span class="admin-pre-comment">
-                                        <span style="position:relative; top: -1px;">admin</span>
-                                    </span>
-                                            {% endif %}
-                                        </div>
-                                        <small class="ml-2 text-muted">{{ comment.createdAt | date('M d, Y H:i a') }}</small>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center" style="display: inline-flex">
-                                        <p class="m-0">{{ comment.content }}</p>
-                                        {% if app.user and is_granted('ROLE_ADMIN') %}
-                                            <form action="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" method="POST">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
-                                                <input type="hidden" name="_comment_id" value="{{ comment.id }}">
-                                                <input type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 12px;" value="Delete">
-                                            </form>
+                        {% if not (comment.user.status == 'deleted' or comment.user.status == 'suspended') %}
+                            <div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <small class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
+                                               title="{{ comment.user.fullName }}"></small>
+                                        <span class="ml-2">{{ comment.user.fullName }}</span>
+                                        {% if 'ROLE_ADMIN' in comment.user.roles %}
+                                            <span class="admin-pre-comment">
+                                    <span style="position:relative; top: -1px;">admin</span>
+                                </span>
                                         {% endif %}
                                     </div>
+                                    <small class="ml-2 text-muted">{{ comment.createdAt | date('M d, Y H:i a') }}</small>
                                 </div>
-                            {% endif %}
-                        </div>
-                    {% else %}
-                        <div id="no-comment-js">
-                            <div class="text-center alert alert-danger">No comments !<br>
-                                {% if app.user %}
-                                    Be first and post new comment
-                                {% endif %}
+                                <div class="d-flex justify-content-between align-items-center" style="display: inline-flex">
+                                    <p class="m-0">{{ comment.content }}</p>
+                                    {% if app.user and is_granted('ROLE_ADMIN') %}
+                                        <form action="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" method="POST">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
+                                            <input type="hidden" name="_comment_id" value="{{ comment.id }}">
+                                            <input type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 12px;" value="Delete">
+                                        </form>
+                                    {% endif %}
+                                </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endif %}
+                        {% else %}
+                            <div id="no-comment-js">
+                                <div class="text-center alert alert-danger">No comments !<br>
+                                    {% if app.user %}
+                                        Be first and post new comment
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                     {% if app.user %}
                         <form id="form-comment-js">
                             <div class="form-group">
@@ -235,9 +235,10 @@
                 let comments = response.data;
                 let commentHtml = $('#comment-js-preview');
                 $('div#no-comment-js').remove();
+                commentHtml.html('');
                 comments.forEach(function (comment) {
                     console.log(comment);
-                    commentHtml.html(
+                    commentHtml.prepend(
                         `<div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
