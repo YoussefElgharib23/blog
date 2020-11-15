@@ -12,14 +12,14 @@
                     <small class="d-flex justify-content-between align-items-center">
                         <span>
                             <span class="cat">{{ post.category.name }}</span> -
-                            <span class="text-muted">{{ post.createdAt | date('M d, y') }}</span>
+                            <span class="text-muted">{{ post.createdAt | date('M d, y h:i a') }}</span>
                         </span>
                         <span class="cat">
                             <span class="comment-count">{{ post.comments.count }}</span>
                             <i class="far fa-comment"></i>
-                            <span>{{ post.likes | length }}</span>
+                            <span id="post-like-count-js-top">{{ post.likes | length }}</span>
                             <i class="far fa-thumbs-up"></i>
-                            <span></span>
+                            <span id="post-dislike-count-js-top">{{ post.dislikes | length }}</span>
                             <i class="far fa-thumbs-down" style="position:relative; top: 1px;"></i>
                         </span>
                     </small>
@@ -37,16 +37,20 @@
                                 {% endif %}
                                 <span id="post-likes-js-count">{{ post.likes | length }}</span>
                             </a>
+                            <a href="#" class="link-c" id="dislike-post-js">
+                                {% if post.isDislikedByUser(app.user) %}
+                                    <i class="fas fa-thumbs-down"></i>
+                                {% else %}
+                                    <i class="far fa-thumbs-down"></i>
+                                {% endif %}
+                                <span id="dislike-count-js">{{ post.dislikes | length }}</span>
+                            </a>
                         {% else %}
                             <span class="link-c" style="cursor: not-allowed" title="You need to log in">
                                 <i class="far fa-thumbs-up"></i>
                                 <span id="post-likes-js-count">{{ post.likes | length }}</span>
                             </span>
                         {% endif %}
-                        <a href="" class="link-c">
-                            <i class="far fa-thumbs-down"></i>
-                            <span>10</span>
-                        </a>
                     </div>
                     <section class="mt-4 description-article">
                         <h2 class="text-center">Description</h2>
@@ -92,13 +96,10 @@
                     {% endfor %}
                     </div>
                     {% if app.user %}
-                        <form id="form-comment-js">
-                            <div class="form-group">
-                                <textarea rows="5" class="form-control" id="comment-in-js"></textarea>
-                                <input type="hidden" value="{{ post.id }}" id="post-id-js">
-                                <input type="submit" class="btn btn-block btn-outline-success mt-2" value="Comment">
-                            </div>
-                        </form>
+                        {{ form_start(formComment) }}
+                        {{ form_widget(formComment) }}
+                        <input type="submit" class="btn btn-block btn-outline-info">
+                        {{ form_end(formComment) }}
                     {% else %}
                         <div class="text-center alert alert-danger">
                             You are logged anonymously <br>
@@ -198,102 +199,70 @@
             </div>
         </div>
     </div>
-    <div class="notification-flash-js">
-        <div class="not-flash alert alert-success p-2 notification-js hide-notification-js" style="position: fixed; bottom: 40px; right: 20px">
-            <span id="notification-message-js"></span>
-        </div>
-    </div>
 {% endblock %}
 
 {% block javascripts %}
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    {#  AJAX LIKES  #}
     <script>
-        function showNotification(message) {
-            $('span#notification-message-js').text(message);
-            $('div.not-flash').toggleClass('hide-notification-js', 'show-notification-js');
-            setTimeout(function () {
-                $('div.not-flash').toggleClass('hide-notification-js', 'hide-notification-js');
-            }, 2000);
-        }
-
-        $('form#form-comment-js').submit(function (event) {
-            event.preventDefault();
-            let commentUser = $('textarea#comment-in-js'),
-                post_id = $('input#post-id-js').val(),
-                urlComment = 'https://127.0.0.1:8000/comment/post'
-            axios.post(urlComment, {
-                commentContent: commentUser.val(),
-                postId: post_id
-            })
-            .then(function (response) {
-                commentUser.val('');
-                getComments();
-                showNotification('Your comment was posted with success !');
-            })
-            .catch(function (error) {
-                console.log(error.message);
-            });
-        });
-
-        function getComments()
-        {
-            let url = 'https://127.0.0.1:8000/comment/get';
-            axios.get(url, {})
-            .then(function (response) {
-                let comments = response.data;
-                let commentHtml = $('#comment-js-preview');
-                $('div#no-comment-js').remove();
-                commentHtml.html('');
-                comments.forEach(function (comment) {
-                    console.log(comment);
-                    commentHtml.prepend(
-                        `<div class="comment-user-display" style="background-color: #f8f8f8; border-radius: 0.3em; padding: 10px; margin-bottom: 10px;">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center">
-                                    <small class="fa fa-user" style="background-color: aliceblue; padding: 6px; height: 30px; width: 30px; border-radius: 50%;"
-                                           title="${comment.user.fullName}"></small>
-                                    <span class="ml-2">${comment.user.fullName}</span>
-                                </div>
-                                <small class="ml-2 text-muted">${comment.created_at}</small>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center" style="display: inline-flex">
-                                <p class="m-0">${comment.content}</p>
-                                {% if app.user and is_granted('ROLE_ADMIN') %}
-                                    <form action="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" method="POST">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_comment') }}">
-                                        <input type="hidden" name="_comment_id" value="${comment.id}">
-                                        <input type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 12px;" value="Delete">
-                                    </form>
-                                {% endif %}
-                            </div>
-                        </div>`
-                    );
-                });
-            })
-            .catch(function (error) {
-                console.log(error.message);
-            });
-        }
-    </script>
-    <script>
-
-        $('a#like-js-post').mouseover(function () {
-        });
 
         $('#like-js-post').click(function (event) {
             event.preventDefault();
-            let url = 'https://127.0.0.1:8000/nisi-laborum-ut-201/like'
-            axios.post(url,{}
-            ).then(function (response) {
-                let likeCount = response.data['likeCount'];
-                $('#post-likes-js-count').text(likeCount);
+            let url = "{{ url('post_like_ajax', {'id': post.id, 'slug': post.slug}) }}";
+            axios.post(url,{})
+            .then(function (response) {
+                changelikeCount(response);
                 if ( response.data['message'] === '-1')
-                    $('.fa-thumbs-up').toggleClass('far', 'fas');
+                    $('.likes-post .fa-thumbs-up').toggleClass('far', 'fas');
                 else
-                    $('.fa-thumbs-up').toggleClass('fas', 'far');
+                    $('.likes-post .fa-thumbs-up').toggleClass('fas', 'far');
+
+                // CHECK IF THE POST WAS DISLIKED BY USER WE NEED TO REMOVE THE DISLIKE
+                if ( response.data['isDisliked'] ) {
+                    $("#dislike-post-js .fa-thumbs-down").toggleClass('far', 'fas');
+                    changeDislikeCount(response);
+                }
             })
             .catch(function (error) { console.log(error.message); });
         });
+
+    {#  END AJAX LIKES  #}
+    {#  AJAX DISLIKES  #}
+
+        $('a#dislike-post-js').click(function (event) {
+            event.preventDefault();
+            let dislikeUrl = '{{ url('post_dislike_ajax', {'id': post.id, 'slug': post.slug}) }}';
+            axios.post(dislikeUrl, {})
+            .then(function (response) {
+                changeDislikeCount(response);
+                if (response.data['message'] === '-1')
+                    $("#dislike-post-js .fa-thumbs-down").toggleClass('far', 'fas');
+                else
+                    $("#dislike-post-js .fa-thumbs-down").toggleClass('fas', 'far');
+
+                // SET THE LIKE AT 0 AND REMOVE IT IF THE USER LIKES AND DISLIKE THE POST
+                if ( response.data['isLiked'] ) {
+                    $('.likes-post .fa-thumbs-up').toggleClass('far', 'fas');
+                    changelikeCount(response);
+                }
+            });
+        });
+        {#  END AJAX DISLIKES  #}
+
+        function changelikeCount(response)
+        {
+            let likeCount = response.data['likeCount'];
+            $("#post-like-count-js-top").text(likeCount);
+            $('#post-likes-js-count').text(likeCount);
+        }
+
+        function changeDislikeCount(response)
+        {
+            let dislikeCount = response.data['dislikeCount'];
+            $('#post-dislike-count-js-top').text(dislikeCount);
+            $('#dislike-count-js').text(dislikeCount);
+        }
 
     </script>
 

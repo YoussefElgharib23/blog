@@ -100,6 +100,8 @@ class ClientController extends AbstractController
         if ( $slug !== $post->getSlug() ) return $this->redirectToRoute('app_client_show_post', ['id' => $post->getId(), 'slug' => $post->getSlug()]);
 
         // ADD THE VIEWS ALSO THE CLIENT IP TO THE DATABASE AND STORE THE CHANGES
+        // INCREMENT VIEWS IN MESSENGER
+        // STORE THE IP
         if ( $this->getUser() AND in_array('ROLE_USER', $this->getUser()->getRoles()) ) {
             $post->setViews( $post->getViews() + 1 );
             $this->entityManager->persist($post);
@@ -198,7 +200,7 @@ class ClientController extends AbstractController
             'relatedPost'  => $relatedPost,
             'categories'   => $categories,
             'mayLikePosts' => $mayLikePosts,
-          //'formComment'  => isset($formComment) ? $formComment->createView() : null,
+            'formComment'  => isset($formComment) ? $formComment->createView() : null,
             'postComment'  => $postComments
         ]);
     }

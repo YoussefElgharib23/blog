@@ -75,11 +75,17 @@ class Post
      */
     private $notifications;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Dislike::class, mappedBy="Post")
+     */
+    private $dislikes;
+
     public function __construct()
     {
         $this->comments = new ArrayCollection();
         $this->likes = new ArrayCollection();
         $this->notifications = new ArrayCollection();
+        $this->dislikes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -265,5 +271,47 @@ class Post
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection|Dislike[]
+     */
+    public function getDislikes(): Collection
+    {
+        return $this->dislikes;
+    }
+
+    public function addDislike(Dislike $dislike): self
+    {
+        if (!$this->dislikes->contains($dislike)) {
+            $this->dislikes[] = $dislike;
+            $dislike->setPost($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDislike(Dislike $dislike): self
+    {
+        if ($this->dislikes->removeElement($dislike)) {
+            // set the owning side to null (unless already changed)
+            if ($dislike->getPost() === $this) {
+                $dislike->setPost(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * CHECK IF THE USER IS DISLIKE THE CURRENT POST
+     *
+     * @param User $user
+     * @return bool
+     */
+    public function isDislikedByUser(User $user)
+    {
+        foreach ($this->getDislikes() as $dislike) if ( $dislike->getUser() === $user) return true;
+        return false;
     }
 }

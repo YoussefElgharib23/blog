@@ -43,7 +43,7 @@ class Comment
 
     /**
      * @ORM\Column(type="datetime")
-     * @Groups("ajax:comment")
+     * @Groups({"ajax:comment"})
      */
     private $createdAt;
 

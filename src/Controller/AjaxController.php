@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Dislike;
 use App\Entity\Like;
 use App\Entity\Notification;
 use App\Entity\Post;
 use App\Repository\CategoryRepository;
+use App\Repository\DislikeRepository;
 use App\Repository\LikeRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\PostRepository;
@@ -20,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class AjaxController
  * @package App\Controller
- * @IsGranted ("ROLE_ADMIN")
+ * @IsGranted ("ROLE_USER")
  */
 class AjaxController extends AbstractController
 {
@@ -44,14 +46,110 @@ class AjaxController extends AbstractController
      * @var EntityManagerInterface
      */
     private EntityManagerInterface $entityManager;
+    /**
+     * @var DislikeRepository
+     */
+    private DislikeRepository $dislikeRepository;
 
-    public function __construct(EntityManagerInterface $entityManager, LikeRepository $likeRepository, NotificationRepository $notificationRepository, CategoryRepository $repository, PostRepository $postRepository)
+    public function __construct(DislikeRepository $dislikeRepository, EntityManagerInterface $entityManager, LikeRepository $likeRepository, NotificationRepository $notificationRepository, CategoryRepository $repository, PostRepository $postRepository)
     {
         $this->repository = $repository;
         $this->postRepository = $postRepository;
         $this->notificationRepository = $notificationRepository;
         $this->likeRepository = $likeRepository;
         $this->entityManager = $entityManager;
+        $this->dislikeRepository = $dislikeRepository;
+    }
+
+    /**
+     *
+     * @Route("/{slug}-{id}/like", name="post_like_ajax", methods={"GET", "POST"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
+     * @param Post $post
+     * @return JsonResponse
+     */
+    public function likePost(Post $post)
+    {
+        $jsonArrayReturn = [
+            'code'         => 'success',
+            'message'      => '+1',
+            'likeCount'    => 0,
+            'dislikeCount' => 0,
+            'isDisliked' => false
+        ];
+        $user = $this->getUser();
+        if ( $post->isLikedByUser($user) ) {
+            $userLike = $this->likeRepository->findOneBy(['User' => $user]);
+            $post->removeLike($userLike);
+
+            $this->entityManager->remove($userLike);
+            $this->entityManager->flush();
+
+            $jsonArrayReturn['likeCount'] = $post->getLikes()->count();
+        }
+        else {
+            $like = new Like();
+            $like
+                ->setUser($user)
+                ->setPost($post)
+            ;
+            $post->addLike($like);
+            if ( $post->isDislikedByUser($user) ) {
+                $userDislike = $this->dislikeRepository->findOneBy(['User' => $user, 'Post' => $post]);
+                $post->removeDislike($userDislike);
+                $this->entityManager->remove($userDislike);
+                $jsonArrayReturn['isDisliked'] = true;
+                $jsonArrayReturn['dislikeCount'] = $post->getDislikes()->count();
+            }
+            $this->entityManager->persist($like);
+            $this->entityManager->flush();
+
+            $jsonArrayReturn['message'] = '+1';
+            $jsonArrayReturn['likeCount'] = $post->getLikes()->count();
+        }
+        return $this->json($jsonArrayReturn, 200);
+    }
+
+    //DISLIKE POST
+    /**
+     * @Route("/{slug}-{id}/dislike", name="post_dislike_ajax", methods={"GET", "POST"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
+     * @param Post $post
+     * @return JsonResponse
+     */
+    public function dislikePost(Post $post)
+    {
+        $jsonArrayReturn = [
+            'status' => 'success',
+            'message' => '+1',
+            'isLiked' => false,
+            'dislikeCount' => 0,
+            'likeCount' => 0
+        ];
+        $user = $this->getUser();
+        $userDislike = (new Dislike())->setUser($user)->setPost($post);
+        if ( $post->isDislikedByUser($user)) {
+            $userDislike = $this->dislikeRepository->findOneBy(['User' => $user, 'Post' => $post]);
+            $post->removeDislike($userDislike);
+
+            $this->entityManager->remove($userDislike);
+            $this->entityManager->flush();
+
+            $jsonArrayReturn['message'] = '-1';
+            $jsonArrayReturn['dislikeCount'] = $post->getDislikes()->count();
+        }
+        else {
+            $post->addDislike($userDislike);
+            if ( $post->isLikedByUser($user) ) {
+                $userLike = $this->likeRepository->findOneBy(['User' => $user, 'post' => $post]);
+                $post->removeLike($userLike);
+                $this->entityManager->remove($userLike);
+                $jsonArrayReturn['isLiked']  = true;
+            }
+            $this->entityManager->persist($userDislike);
+            $jsonArrayReturn['dislikeCount'] = $post->getDislikes()->count();
+            $jsonArrayReturn['likeCount'] = $post->getLikes()->count();
+        }
+        $this->entityManager->flush();
+        return $this->json($jsonArrayReturn);
     }
 
     /**
@@ -123,46 +221,6 @@ class AjaxController extends AbstractController
             else $previousNotifications = $notification;
         }
         return $this->json(['notViewedNotifications' => $notifications, 'previousNotifications' => $previousNotifications, 'todayNotifications' => $todayNotifications]);
-    }
-
-    /**
-     *
-     * @Route("/{slug}-{id}/like", methods={"GET", "POST"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
-     * @param Post $post
-     * @return JsonResponse
-     */
-    public function likePost(Post $post)
-    {
-        $user = $this->getUser();
-        if ( $post->isLikedByUser($user) ) {
-            $userLike = $this->likeRepository->findOneBy(['User' => $user]);
-            $post->removeLike($userLike);
-
-            $this->entityManager->remove($userLike);
-            $this->entityManager->flush();
-
-            return $this->json([
-                'code'      => 'success',
-                'message'   => '-1',
-                'likeCount' => count($post->getLikes())
-            ], 200);
-        }
-        else {
-            $like = new Like();
-            $like
-                ->setUser($user)
-                ->setPost($post)
-            ;
-            $post->addLike($like);
-
-            $this->entityManager->persist($like);
-            $this->entityManager->flush();
-        }
-        return $this->json([
-            'code'      => 'success',
-            'message'   => '+1',
-            'likeCount' => count($post->getLikes()),
-        ], 200);
     }
 
     /**
