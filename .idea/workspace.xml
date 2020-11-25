@@ -5,34 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b65583b-a366-43c7-b263-8f198f9ec7bf" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/assets/lib/js/PostAjaxSearch.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Security/PostVoter.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/admin/post/edit.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/blog.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/blog.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/Sass/app.scss" beforeDir="false" afterPath="$PROJECT_DIR$/assets/Sass/app.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/assets/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/lib/js/ajax.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/assets/lib/js/post_ajax_search.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/services.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/services.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/AdminController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/AdminController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/AjaxController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/AjaxController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/ClientController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/ClientController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/RegistrationController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/RegistrationController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Controller/UserController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/UserController.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Category.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Category.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Entity/Post.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Entity/Post.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Security/AppLoginAuthenticator.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Security/AppLoginAuthenticator.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/index.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/index.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/user/index.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/user/index.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/admin/user/suspend.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/user/suspend.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/client/index.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/client/index.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/client/search.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/client/search.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/client/show.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/client/show.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/comment/index.html.twig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/comment_ajax/index.html.twig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/interaction/_notification.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/interaction/_notification.html.twig" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/page/index.html.twig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/post/_all.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/post/_all.html.twig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Controller/SecurityController.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Controller/SecurityController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/admin/post/edit.html.twig" beforeDir="false" afterPath="$PROJECT_DIR$/templates/admin/post/edit.html.twig" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -158,6 +135,10 @@
       <path value="$PROJECT_DIR$/vendor/fzaninotto/faker" />
       <path value="$PROJECT_DIR$/vendor/symfony/apache-pack" />
       <path value="$PROJECT_DIR$/vendor/symfonycasts/verify-email-bundle" />
+      <path value="$PROJECT_DIR$/vendor/symfony/doctrine-messenger" />
+      <path value="$PROJECT_DIR$/vendor/symfony/messenger" />
+      <path value="$PROJECT_DIR$/vendor/symfony/amqp-messenger" />
+      <path value="$PROJECT_DIR$/vendor/symfony/redis-messenger" />
     </include_path>
   </component>
   <component name="ProjectId" id="1jTY3D7OAQo3J5MXnMPWHITkmA3" />
@@ -168,7 +149,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../backend" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="php.override.implement.member.chooser.php.doc" value="NONE" />
     <property name="settings.editor.selected.configurable" value="web-ide.project.structure" />
@@ -231,6 +212,8 @@
       <workItem from="1605882999428" duration="34000" />
       <workItem from="1606254736108" duration="1570000" />
       <workItem from="1606259305787" duration="14000" />
+      <workItem from="1606331056191" duration="1222000" />
+      <workItem from="1606335526229" duration="1301000" />
     </task>
     <servers />
   </component>
@@ -280,14 +263,14 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="488" y="178" key="refactoring.ChangeSignatureDialog/0.0.1536.824@0.0.1536.824" timestamp="1604929131857" />
-    <state x="425" y="187" key="run.anything.popup" timestamp="1605386330210">
+    <state x="425" y="187" key="run.anything.popup" timestamp="1606335861284">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="425" y="187" key="run.anything.popup/0.0.1536.824@0.0.1536.824" timestamp="1605386330210" />
-    <state x="430" y="145" width="672" height="600" key="search.everywhere.popup" timestamp="1606256225224">
+    <state x="425" y="187" key="run.anything.popup/0.0.1536.824@0.0.1536.824" timestamp="1606335861284" />
+    <state x="430" y="145" width="672" height="600" key="search.everywhere.popup" timestamp="1606336319394">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="430" y="145" width="672" height="600" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1606256225224" />
+    <state x="430" y="145" width="672" height="600" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1606336319394" />
     <state x="431" y="185" width="672" height="160" key="search.everywhere.popup/0.40.1536.824@0.40.1536.824" timestamp="1603922880034" />
   </component>
 </project>

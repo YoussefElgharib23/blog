@@ -4,25 +4,29 @@ namespace App\Controller;
 
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 class SecurityController extends AbstractController
 {
     /**
      * @Route("/login", name="app_login")
+     * @param Request $request
      * @param AuthenticationUtils $authenticationUtils
      * @return Response
      */
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
-         if ($this->getUser() AND $this->isGranted('ROLE_ADMIN')) {
-             return $this->redirectToRoute('app_admin_index');
-         }
-         elseif ($this->getUser() AND $this->isGranted('ROLE_USER')) {
+        if ($this->getUser() AND $this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('app_admin_index');
+        }
+        elseif ($this->getUser() AND $this->isGranted('ROLE_USER')) {
             return $this->redirectToRoute('app_client_index');
-         }
+        }
 
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
