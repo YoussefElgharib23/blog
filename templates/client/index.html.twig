@@ -32,24 +32,22 @@
         {# END FIRST POST LAYOUT #}
         {# START POSTS LAYOUT #}
         <h2 class="my-4 text-muted text-center">Posts</h2>
-        {% for row in posts | batch(4) %}
-            <div class="row">
-                {% for post in row %}
-                    <div class="col-lg-3 col-md-4 col-sm-6">
-                        <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="article-img-link">
-                            <img class="rounded-lg img-fluid" src="{{ post.imageLink }}"  alt="">
-                        </a>
-                        <small>
-                            <span class="cat">{{ post.category.name }}</span>
-                            <span class="text-muted">{{ post.createdAt | date('M d, Y') }}</span>
-                        </small>
-                        <h5 class="_font-25-sm">
-                            <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="link-c">{{ post.title }}</a>
-                        </h5>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endfor %}
+        <div class="row">
+            {% for post in posts %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="article-img-link">
+                        <img class="rounded-lg img-fluid" src="{{ post.imageLink }}"  alt="">
+                    </a>
+                    <small>
+                        <span class="cat">{{ post.category.name }}</span>
+                        <span class="text-muted">{{ post.createdAt | date('M d, Y') }}</span>
+                    </small>
+                    <h5 class="_font-25-sm">
+                        <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="link-c">{{ post.title }}</a>
+                    </h5>
+                </div>
+            {% endfor %}
+        </div>
     </div>
     {# END POSTS LAYOUT #}
 {% endblock %}

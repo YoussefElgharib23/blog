@@ -32,6 +32,7 @@ class Category
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups("category:search")
+     * @Groups ("post:ajax")
      */
     private ?string $name;
 

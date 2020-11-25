@@ -140,5 +140,6 @@ class AppLoginAuthenticator extends AbstractFormLoginAuthenticator implements Pa
 
     public function logout()
     {
+        return new RedirectResponse($this->urlGenerator->generate('app_login'));
     }
 }

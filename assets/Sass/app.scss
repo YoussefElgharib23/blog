@@ -136,7 +136,6 @@
 }
 
 // END FLASHY
-
 @keyframes changeOpacityImg {
     from {
         opacity: 0;
@@ -146,7 +145,7 @@
     }
 }
 
-.img, img {
+.img-ani {
     opacity: 0;
     animation: changeOpacityImg;
     animation-delay: .5s;
@@ -196,6 +195,7 @@
     border-bottom: 1px solid;
     transition: border-color .2s ease-in-out, width .3s ease-in-out;
 }
+
 #search-in-post-js {
     border: none;
     background-color: inherit;
@@ -218,14 +218,15 @@
     border-color: #fe4f4f;
 }
 
-.fa-search {
-    transition: color .2s ease-in-out;
-}
-
 #search-in-js:focus {
     outline: none;
     border-color: #fe4f4f;
     width: 100%;
+}
+
+
+.fa-search {
+    transition: color .2s ease-in-out;
 }
 
 img.s-i {
@@ -251,7 +252,7 @@ img.s-i:hover {
 }
 
 .article-img-pre:hover {
-    @extend .shadow-lg;
+    @extend .shadow;
 }
 
 @media (max-width: 992px) {

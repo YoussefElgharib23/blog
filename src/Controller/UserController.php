@@ -6,6 +6,9 @@ use App\Entity\Report;
 use App\Entity\User;
 use App\Form\ReportFormType;
 use App\Repository\CommentRepository;
+use App\Repository\DislikeRepository;
+use App\Repository\LikeRepository;
+use App\Repository\NotificationRepository;
 use App\Repository\ReportRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -20,7 +23,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class UserController
  * @package App\Controller
- * @Route("/admin/user", name="app_admin_user_")
+ * @Route("/admin/users", name="app_admin_user_")
  * @IsGranted ("ROLE_ADMIN")
  */
 class UserController extends AbstractController
@@ -46,14 +49,29 @@ class UserController extends AbstractController
      * @var CommentRepository
      */
     private CommentRepository $commentRepository;
+    /**
+     * @var LikeRepository
+     */
+    private LikeRepository $likeRepository;
+    /**
+     * @var DislikeRepository
+     */
+    private DislikeRepository $dislikeRepository;
+    /**
+     * @var NotificationRepository
+     */
+    private NotificationRepository $notificationRepository;
 
-    public function __construct(CommentRepository $commentRepository, FlashyNotifier $flashyNotifier, EntityManagerInterface $entityManager, UserRepository $userRepository, ReportRepository $reportRepository)
+    public function __construct(NotificationRepository $notificationRepository, LikeRepository $likeRepository, DislikeRepository $dislikeRepository, CommentRepository $commentRepository, FlashyNotifier $flashyNotifier, EntityManagerInterface $entityManager, UserRepository $userRepository, ReportRepository $reportRepository)
     {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
         $this->flashyNotifier = $flashyNotifier;
         $this->reportRepository = $reportRepository;
         $this->commentRepository = $commentRepository;
+        $this->likeRepository = $likeRepository;
+        $this->dislikeRepository = $dislikeRepository;
+        $this->notificationRepository = $notificationRepository;
     }
 
     /**
@@ -88,7 +106,7 @@ class UserController extends AbstractController
     /**
      * GET THE USER ANS SUSPEND HIM AND SENT THE EMAIL TO HIS MAIL BOX
      *
-     * @Route("/suspend/{id}", name="suspend_user", methods={"GET", "POST"}, requirements={"id": "\d+"})
+     * @Route("/suspend/{id}", name="suspend", methods={"GET", "POST"}, requirements={"id": "\d+"})
      * @param Request $request
      * @param User $user
      * @return Response
@@ -127,7 +145,7 @@ class UserController extends AbstractController
 
         return $this->render('admin/user/delete.html.twig', [
             'user' => $user,
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 
@@ -155,27 +173,34 @@ class UserController extends AbstractController
 
     /**
      *
-     * @Route("/{firstName?}", name="search_user", methods={"GET", "POST"}, requirements={"firstName": "[a-z\ ]*"})
+     * @Route("/{firstName?|lastName?|username?}", name="search_user", methods={"GET", "POST"}, requirements={"firstName": "[a-z\ ]*"})
      * @param User|null $user
      * @param Request $request
-     * @param string|null $firstName
-     * @param string|null $lastName
      * @return Response
      */
-    public function searchUserByUserName(User $user = null, Request $request, string $firstName = null, string $lastName = null)
+    public function searchUser(Request $request)
     {
-        $username = $firstName ?? $lastName;
-        if ( $request->getMethod() === 'POST' AND $request->request->has('_username') ) {
+        $username = null;
+        $user = null;
+        if ( $request->isMethod('POST') ) {
             $username = strtolower($request->request->get('_username'));
-            if ( '' === trim($username) ) return $this->redirectToRoute('app_admin_user_index');
-            $user = $this->userRepository->findOneBy(['firstName' => $username]);
-            if ( null === $user ) $user = $this->userRepository->findOneBy(['lastName' => $username]);
+            $username = trim($username);
+            if ( $username === '' ) return $this->redirectToRoute('app_admin_user_index');
 
-            return $this->redirectToRoute('app_admin_user_search_user', [
-                'firstName' => $user !== null ? strtolower($user->getFirstName() ): $username
-            ]);
+            $user = $this->userRepository->findOneBy(['firstName' => $username]);
+            if ( $user === null ) $user = $this->userRepository->findOneBy(['lastName' => $username]);
+            if ( $user === null ) $user = $this->userRepository->findOneBy(['fullName' => $username]);
+
+            if ( $user === null ) {
+                $len = strlen($username);
+                $users = $this->userRepository->findAll();
+                foreach($users as $_user) {
+                    if (stristr($username, substr($_user->getFullName(), 0, $len))) {
+                        $user = $_user;
+                    }
+                }
+            }
         }
-        if ( $user === $this->getUser() ) $user = null;
 
         return $this->render('admin/user/index.html.twig',[
             'user' => $user,
@@ -208,10 +233,24 @@ class UserController extends AbstractController
     private function deleteAllTheRelatedActionToUser(User $user)
     {
         $reports = $this->reportRepository->findBy(['user' => $user]);
-        foreach ( $reports as $report ) $this->entityManager->remove($report);
+        if ( null !== $reports)
+            foreach ( $reports as $report ) $this->entityManager->remove($report);
 
         $comments = $this->commentRepository->findBy(['user' => $user]);
-        foreach ( $comments as $comment ) $this->entityManager->remove($comment);
+        if ( null !== $comments)
+            foreach ( $comments as $comment ) $this->entityManager->remove($comment);
+
+        $likes = $this->likeRepository->findBy(['User' => $user]);
+        if ( null !== $likes)
+        foreach ( $likes as $like ) $this->entityManager->remove($like);
+
+        $dislikes = $this->dislikeRepository->findOneBy(['User' => $user]);
+        if ( null !== $dislikes )
+            foreach ( $dislikes as $dislike ) $this->entityManager->remove($dislike);
+
+        $notifications = $this->notificationRepository->findBy(['User' => $user]);
+        if ( null !== $notifications )
+            foreach ( $notifications as $notification ) $this->entityManager->remove($notification);
 
         $this->entityManager->flush();
     }

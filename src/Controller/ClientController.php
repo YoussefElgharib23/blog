@@ -83,8 +83,8 @@ class ClientController extends AbstractController
         $firstPost = $this->postRepository->findOneBy([], ['id' => 'DESC']);
         $posts = $this->postRepository->findExcept($firstPost);
         return $this->render(self::TEMPLATE_PATH_CLIENT.'/index.html.twig', [
-            'firstPost'         => $firstPost,
-            'posts'             => $posts
+            'firstPost' => $firstPost,
+            'posts'     => $posts,
         ]);
     }
 
@@ -99,6 +99,9 @@ class ClientController extends AbstractController
     {
         if ( $slug !== $post->getSlug() ) return $this->redirectToRoute('app_client_show_post', ['id' => $post->getId(), 'slug' => $post->getSlug()]);
 
+        // !!! NOTICE !!!
+        // TO DO IN MESSENGER:
+        // INCREMENT THE POST VIEWS | SET THE COMMENT | DELETE COMMENT ACTIONS | STORE THE CLIENT IP
         // ADD THE VIEWS ALSO THE CLIENT IP TO THE DATABASE AND STORE THE CHANGES
         // INCREMENT VIEWS IN MESSENGER
         // STORE THE IP
@@ -107,13 +110,13 @@ class ClientController extends AbstractController
             $this->entityManager->persist($post);
 
             $ip = ( new Ip() )->setIpType('USER')->setIpAddress( $request->getClientIp() );
-            if ( NULL === $this->ipRepository->findOneBy(['ipAddress' => $ip->getIpAddress()]) ) {
+            if ( NULL === $this->ipRepository->findOneBy(['ipAddress' => $ip->getIpAddress(), 'ipType' => 'USER']) ) {
                 $this->entityManager->persist($ip);
             }
             $this->entityManager->flush();
         }
 
-        // IF A USER IS CONNECTED CREATE NEW COMMENT FORM AND PASS IT TO THE VIEW
+        // IF A USER IS CONNECTED CREATE NEW COMMENT FORM AND PASS IT TO THE TEMPLATE
         $currentUser = $this->getUser();
         if ( $currentUser !== NULL ) {
             $comment = ( new Comment() )->setPost($post)->setUser($currentUser);
@@ -125,7 +128,7 @@ class ClientController extends AbstractController
         if ( isset($formComment) && $formComment->isSubmitted() && $formComment->isValid() ) {
             $this->entityManager->persist($comment);
 
-            if ( in_array('ROLE_USER', $currentUser->getRoles()) ) {
+            if ( in_array('ROLE_USER', $currentUser->getRoles()) && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
                 $notification = new Notification();
                 $notification
                     ->setIsViewed(false)
@@ -149,11 +152,11 @@ class ClientController extends AbstractController
 
         // GET PREVIOUS, NEXT POST
         $previousPost = $this->postRepository->findOneBy(['id' => $post->getId() - 1]);
-        $nextPost = $this->postRepository->findOneBy(['id' => $post->getId() + 1]);
+        $nextPost     = $this->postRepository->findOneBy(['id' => $post->getId() + 1]);
 
         // GET ONE THE POST WHICH HAS THE SAME CATEGORY RANDOMLY
         $firstPostId = $this->postRepository->findOneBy([])->getId();
-        $lastPostId = $this->postRepository->findOneBy([], ['id' => 'DESC'])->getId();
+        $lastPostId  = $this->postRepository->findOneBy([], ['id' => 'DESC'])->getId();
         $relatedPost = $post;
         while ( $relatedPost === $post OR $relatedPost === null ) {
             $relatedPost = $this->postRepository->findOneBy(['id' => mt_rand($firstPostId, $lastPostId), 'category' => $post->getCategory()]);
@@ -208,7 +211,7 @@ class ClientController extends AbstractController
     /**
      * FIND ALL POSTS UNDER THE GIVEN CATEGORY
      *
-     * @Route("/{slug<[a-z\-]+>}/search", name="app_client_posts_category_search", methods={"GET"})
+     * @Route("/{slug}/search", name="app_client_posts_category_search", methods={"GET"}, requirements={"slug": "[a-z\-]*"})
      * @param Category $category
      * @return Response
      */

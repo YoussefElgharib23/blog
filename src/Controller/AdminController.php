@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Category;
-use App\Entity\Ip;
 use App\Entity\Post;
 use App\Form\CategoryFormType;
 use App\Form\PostFormType;
@@ -12,9 +11,9 @@ use App\Repository\CommentRepository;
 use App\Repository\IpRepository;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -132,52 +131,49 @@ class AdminController extends AbstractController
     }
 
     /**
-     * SHOW THE POST BY ID
-     *
-     * @Route("/posts/{slug}-{id}", name="post_show", methods={"GET", "POST"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
+     * @Route("/{id}/edit", name="edit_post", methods={"GET", "PATCH"}, requirements={"id": "\d+"})
      * @param Request $request
      * @param Post $post
      * @return Response
-     * @throws NonUniqueResultException
      */
-    public function showPost(Request $request, Post $post): Response
+    public function editPost(Request $request, Post $post)
     {
-        if ( NULL === $this->ipRepository->findOneBy(['ipAddress' => $request->getClientIp()]) ) {
-            $post->incrementViews();
-            $userType =  $this->isGranted('ROLE_ADMIN') ? 'ADMIN' : 'USER';
-            $this->em->persist(( new Ip() )->setIpAddress($request->getClientIp())->setIpType($userType));
+        $this->denyAccessUnlessGranted('edit', $post);
+        $formPost = $this->createForm(PostFormType::class, $post, [
+            'method' => 'PATCH'
+        ]);
+
+        $formPost->handleRequest($request);
+
+        if ( $formPost->isSubmitted() && $formPost->isValid() ) {
+            $this->em->flush();
+
+            $this->flashyNotifier->success('The post was updated with successfully !');
+
+            return $this->redirectToRoute('app_client_show_post', [
+                'id'   => $post->getId(),
+                'slug' => $post->getSlug(),
+            ]);
         }
-        $this->em->flush();
-        $relatedPost = $this->postRepository->findRelatedPost($post);
-        $categories = $this->categoryRepository->findAll();
-        $previousPosts = $this->postRepository->previousPosts($post, $relatedPost);
 
-
-
-        return $this->render('admin/show_post.html.twig', [
-            'post' => $post, 
-            'relatedPost' => $relatedPost,
-            'categories' => $categories,
-            'previousPosts' => $previousPosts
+        return $this->render('admin/post/edit.html.twig', [
+            'form' => $formPost->createView(),
+            'post' => $post,
         ]);
     }
 
     /**
-     *
-     * @Route("/{id}/delete", name="post_delete", methods={"DELETE"}, requirements={"id": "\d+"})
-     * @param Request $request
+     * @Route("/admin/{id}/delete", name="post_delete", methods={"GET"}, requirements={"id": "\d+"})
      * @param Post $post
-     * @return Response
+     * @return RedirectResponse
      */
-    public function deletePost(Request $request, Post $post): Response
+    public function deletePost(Post $post)
     {
-        if ($this->isCsrfTokenValid('delete_post' . $post->getId(), $request->request->get('_token')))
-        {
-            $this->em->remove($post);
-            $this->em->flush();
+        $this->denyAccessUnlessGranted('delete', $post);
+        $this->em->remove($post);
+        $this->em->flush();
 
-            $this->flashyNotifier->success('The post was deleted with success');
-        }
-        return $this->redirectToRoute(self::INDEX_ROUTE);
+        $this->flashyNotifier->success('The post was deleted with successfully !');
+        return $this->redirectToRoute('app_client_index');
     }
 }

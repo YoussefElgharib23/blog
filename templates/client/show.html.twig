@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title post.slug | capitalize %}
+{% block title post.slug | capitalize ~ ' | Blog.wip' %}
 
 {% block body %}
     {{ include('client/shared/_style.html.twig') }}
@@ -8,6 +8,16 @@
         <div class="row mt-4">
             {# START MAIN POST #}
             <div class="col-lg-8">
+                {% if app.user and is_granted('ROLE_ADMIN') %}
+                    <div class="fa-sm">
+                        <a href="{{ path('app_admin_edit_post', {'id': post.id}) }}" class="link-c" title="Edit the post">
+                            <i class="fa fa-pen"></i>
+                        </a>
+                        <a href="{{ path('app_admin_post_delete', {'id': post.id}) }}" id="post-delete-js" class="link-c" title="Delete the post">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </div>
+                {% endif %}
                 <article>
                     <small class="d-flex justify-content-between align-items-center">
                         <span>
@@ -49,6 +59,8 @@
                             <span class="link-c" style="cursor: not-allowed" title="You need to log in">
                                 <i class="far fa-thumbs-up"></i>
                                 <span id="post-likes-js-count">{{ post.likes | length }}</span>
+                                <i class="far fa-thumbs-down"></i>
+                                <span id="dislike-count-js">{{ post.dislikes | length }}</span>
                             </span>
                         {% endif %}
                     </div>
@@ -263,6 +275,12 @@
             $('#post-dislike-count-js-top').text(dislikeCount);
             $('#dislike-count-js').text(dislikeCount);
         }
+
+        $('#post-delete-js').click(function (event) {
+            if ( !confirm('Are sure you wanna delete the post ?') ) {
+                event.preventDefault();
+            }
+        });
 
     </script>
 

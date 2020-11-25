@@ -52,17 +52,17 @@
                         <td>
                             <div class="row">
                                 <div class="col-md-6 mb-xm">
-                                    <a href="#" class="btn btn-sm btn-block btn-success">Active</a>
-                                </div>
-                                <div class="col-md-6 mb-xm">
-                                    <a class="btn btn-sm btn-block btn-danger"
-                                       href="{{ path('app_admin_user_delete', {'id': user.id}) }}">Delete</a>
+                                    <a class="btn btn-sm btn-danger"
+                                       href="{{ path('app_admin_user_suspend', {'id': user.id}) }}">Suspend</a>
                                 </div>
                             </div>
                         </td>
                     </tr>
                 {% endfor %}
                 {% for user in suspendedUsers %}
+                    <tr>
+                        <th colspan="5" class="bg-dark text-light text-center">Suspended users</th>
+                    </tr>
                     <tr>
                         <td>{{ user.id }}</td>
                         <td>{{ user.fullName }}</td>
@@ -82,6 +82,9 @@
                     </tr>
                 {% endfor %}
                 {% for user in deletedUsers %}
+                    <tr>
+                        <th colspan="5" class="bg-dark text-light text-center">Deleted Users</th>
+                    </tr>
                     <tr>
                         <td>{{ user.id }}</td>
                         <td>{{ user.fullName }}</td>

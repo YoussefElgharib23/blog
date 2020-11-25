@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Edit post ' ~ post.slug %}
+
+{% block body %}
+    {{ include('client/shared/_style.html.twig') }}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <h1 class="mt-3 text-center">Edit post</h1>
+                <h3 class="text-center text-muted">Image preview</h3>
+                <img src={{ post.imageLink }}"" alt="" class="rounded-lg img-fluid">
+                <hr>
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
+                <input type="submit" value="Save post" class="btn btn-outline-success btn-block">
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

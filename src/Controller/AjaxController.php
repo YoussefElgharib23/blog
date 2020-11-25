@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class AjaxController
  * @package App\Controller
- * @IsGranted ("ROLE_USER")
+ * @IsGranted ("ROLE_ADMIN")
  */
 class AjaxController extends AbstractController
 {
@@ -181,33 +181,6 @@ class AjaxController extends AbstractController
     }
 
     /**
-     * FIND THE POSTS BY THE NAME
-     *
-     * @Route("/post/find", methods={"POST"})
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function searchPosts(Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $title = $data['title'];
-        $posts = $this->postRepository->findAll();
-        $foundedPosts = [];
-        if (trim($title) !== '') {
-            $title = strtolower($title);
-            $len = strlen($title);
-            foreach ($posts as $post)
-            {
-                if (stristr($title, substr(strtolower($post->getTitle()), 0, $len))) $foundedPosts[] = $post;
-            }
-
-            return $this->json($foundedPosts , 200, [], ['groups' => 'post:ajax']);
-        }
-
-        return $this->json($posts , 200, [], ['groups' => 'post:ajax']);
-    }
-
-    /**
      * @Route("/admin/notifcations/get", name="get_notifications", methods={"POST"})
      * @return JsonResponse
      */
@@ -248,5 +221,34 @@ class AjaxController extends AbstractController
             , 200, [], [
             'groups' => 'ajax_notifications'
         ]);
+    }
+
+    /**
+     * @Route("/ajax/posts/get/all", name="post_ajax", methods={"GET", "POST"})
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function searchPost(Request $request)
+    {
+        $data = json_decode($request->getContent(), true);
+        $title = trim($data['PostTitle']);
+        $posts = $this->postRepository->findBy([], ['created_at' => 'DESC']);
+        $foundedPosts = [];
+        if ($title !== '') {
+            $title = strtolower($title);
+            $len = strlen($title);
+            foreach ($posts as $post)
+            {
+                if (stristr($title, substr(strtolower($post->getTitle()), 0, $len))) $foundedPosts[] = $post;
+            }
+
+            return $this->json($foundedPosts, 200, [], ['groups' => 'post:ajax']);
+        }
+
+        if ( count($foundedPosts) === 0 ) {
+            $foundedPosts = $posts;
+        }
+
+        return $this->json($foundedPosts , 200, [], ['groups' => 'post:ajax']);
     }
 }

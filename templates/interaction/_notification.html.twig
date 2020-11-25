@@ -1,14 +1,14 @@
 <script>
-    function getNewNotifications(from, length)
-    {
-        let url = "https://127.0.0.1:8000/notifications/get",
-            notificationsHtml = $('#tbody-new-notifications-ajax');
-        axios.post(url, {})
-        .then(function (response) {
-            console.log(response.data[0]);
-        });
-    }
+    {#function getNewNotifications()#}
+    {#{#}
+    {#    let url = "{{ url('get_notifications') }}",#}
+    {#        notificationsHtml = $('#tbody-new-notifications-ajax');#}
+    {#    axios.post(url, {})#}
+    {#    .then(function (response) {#}
+    {#        console.log(response.data[0]);#}
+    {#    });#}
+    {#}#}
 
-    getNewNotifications();
-    setInterval(getNewNotifications, 1000);
+    {#getNewNotifications();#}
+    {#setInterval(getNewNotifications, 1000);#}
 </script>
