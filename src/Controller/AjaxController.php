@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class AjaxController
  * @package App\Controller
- * @IsGranted ("ROLE_ADMIN")
+ * @IsGranted ("ROLE_USER")
  */
 class AjaxController extends AbstractController
 {
@@ -85,6 +85,7 @@ class AjaxController extends AbstractController
             $this->entityManager->flush();
 
             $jsonArrayReturn['likeCount'] = $post->getLikes()->count();
+            $jsonArrayReturn['message'] = '-1';
         }
         else {
             $like = new Like();
@@ -101,6 +102,15 @@ class AjaxController extends AbstractController
                 $jsonArrayReturn['dislikeCount'] = $post->getDislikes()->count();
             }
             $this->entityManager->persist($like);
+            if ( !in_array('ROLE_ADMIN', $user->getRoles()) ) {
+                $this->entityManager->persist(
+                    (new Notification())
+                        ->setIsViewed(false)
+                        ->setPost($post)
+                        ->setUser($user)
+                        ->setDescription(' liked the post ')
+                );
+            }
             $this->entityManager->flush();
 
             $jsonArrayReturn['message'] = '+1';
@@ -197,7 +207,7 @@ class AjaxController extends AbstractController
     }
 
     /**
-     * @Route("/notification/count", methods={"POST"})
+     * @Route("/notification/count", methods={"POST"}, name="admin_notification_count_ajax")
      * @return JsonResponse
      */
     public function getNotificationCount(): JsonResponse

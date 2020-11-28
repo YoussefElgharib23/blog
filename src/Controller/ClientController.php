@@ -9,16 +9,21 @@ use App\Entity\Notification;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Form\CommentTypeFormType;
+use App\Message\PostViewsIncerement;
+use App\Message\StoreIp;
+use App\Message\StoreUserComment;
 use App\Repository\CategoryRepository;
 use App\Repository\CommentRepository;
 use App\Repository\IpRepository;
 use App\Repository\NotificationRepository;
 use App\Repository\PostRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
 use MercurySeries\FlashyBundle\FlashyNotifier;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ClientController extends AbstractController
@@ -94,8 +99,9 @@ class ClientController extends AbstractController
      * @param Post $post
      * @param string $slug
      * @return Response
+     * @throws NonUniqueResultException
      */
-    public function showPost(Request $request, Post $post, string $slug): Response
+    public function showPost(Request $request, Post $post, string $slug, MessageBusInterface $bus): Response
     {
         if ( $slug !== $post->getSlug() ) return $this->redirectToRoute('app_client_show_post', ['id' => $post->getId(), 'slug' => $post->getSlug()]);
 
@@ -103,43 +109,22 @@ class ClientController extends AbstractController
         // TO DO IN MESSENGER:
         // INCREMENT THE POST VIEWS | SET THE COMMENT | DELETE COMMENT ACTIONS | STORE THE CLIENT IP
         // ADD THE VIEWS ALSO THE CLIENT IP TO THE DATABASE AND STORE THE CHANGES
-        // INCREMENT VIEWS IN MESSENGER
-        // STORE THE IP
+        $bus->dispatch(new PostViewsIncerement($post->getId()));
         if ( $this->getUser() AND in_array('ROLE_USER', $this->getUser()->getRoles()) ) {
-            $post->setViews( $post->getViews() + 1 );
-            $this->entityManager->persist($post);
-
-            $ip = ( new Ip() )->setIpType('USER')->setIpAddress( $request->getClientIp() );
-            if ( NULL === $this->ipRepository->findOneBy(['ipAddress' => $ip->getIpAddress(), 'ipType' => 'USER']) ) {
-                $this->entityManager->persist($ip);
-            }
-            $this->entityManager->flush();
+            $bus->dispatch(new StoreIp($request->getClientIp(), 'USER'));
         }
 
         // IF A USER IS CONNECTED CREATE NEW COMMENT FORM AND PASS IT TO THE TEMPLATE
         $currentUser = $this->getUser();
         if ( $currentUser !== NULL ) {
-            $comment = ( new Comment() )->setPost($post)->setUser($currentUser);
-            $formComment = $this->createForm(CommentTypeFormType::class, $comment);
+            $formComment = $this->createForm(CommentTypeFormType::class);
         }
 
         if ( isset($formComment) ) $formComment->handleRequest($request);
 
         if ( isset($formComment) && $formComment->isSubmitted() && $formComment->isValid() ) {
-            $this->entityManager->persist($comment);
-
-            if ( in_array('ROLE_USER', $currentUser->getRoles()) && !in_array('ROLE_ADMIN', $currentUser->getRoles())) {
-                $notification = new Notification();
-                $notification
-                    ->setIsViewed(false)
-                    ->setUser($currentUser)
-                    ->setPost($post)
-                    ->setDescription(' commented on post')
-                ;
-                $this->entityManager->persist($notification);
-            }
-
-            $this->entityManager->flush();
+            $data = $formComment->getData();
+            $bus->dispatch(new StoreUserComment($currentUser->getId(), $post->getId(), $data->getContent()));
             $this->flashyNotifier->success('The comment was posted with successfully !');
 
             return $this->redirectToRoute('app_client_show_post', [
@@ -154,33 +139,22 @@ class ClientController extends AbstractController
         $previousPost = $this->postRepository->findOneBy(['id' => $post->getId() - 1]);
         $nextPost     = $this->postRepository->findOneBy(['id' => $post->getId() + 1]);
 
-        // GET ONE THE POST WHICH HAS THE SAME CATEGORY RANDOMLY
-        $firstPostId = $this->postRepository->findOneBy([])->getId();
-        $lastPostId  = $this->postRepository->findOneBy([], ['id' => 'DESC'])->getId();
-        $relatedPost = $post;
-        while ( $relatedPost === $post OR $relatedPost === null ) {
-            $relatedPost = $this->postRepository->findOneBy(['id' => mt_rand($firstPostId, $lastPostId), 'category' => $post->getCategory()]);
-        }
+        $relatedPost = $this->postRepository->findSameCategoryExcept($post);
 
         // GET ALL THE CATEGORIES
         $categories = $this->categoryRepository->findAll();
 
         // GET MAY LIKE POST
-        $ids = [];
-        $mayLikePosts = [];
-        for ($i = 0; $i < 5; $i++) {
-        sfi:
-            $id = $this->postRepository->findOneBy(['id' => mt_rand($firstPostId, $lastPostId)])->getId();
-            if ( in_array($id, $ids) OR $id === $post->getId() OR $id === $relatedPost->getId() ) goto sfi;
-            $ids[] = $id;
-            $mayLikePosts[] = $this->postRepository->findOneBy(['id' => $id]);
-        }
+        $mayLikePosts = $this->postRepository->findMayLikePosts($post, $relatedPost);
 
         // DELETE COMMENT
         if ( $request->getMethod() === 'POST' and $this->isCsrfTokenValid('delete_comment', $request->request->get('_token')) )
         {
             $commentToDelete = $this->commentRepository->find($request->request->get('_comment_id'));
-            $notifications = $this->notificationRepository->findBy(['Post' => $commentToDelete->getPost(), 'User' => $commentToDelete->getUser()]);
+            $notifications = $this->notificationRepository->findBy([
+                'Post' => $commentToDelete->getPost(),
+                'User' => $commentToDelete->getUser()
+            ]);
             $this->denyAccessUnlessGranted('deleteComment', $commentToDelete);
             $this->entityManager->remove($commentToDelete);
             foreach ($notifications as $notification) {

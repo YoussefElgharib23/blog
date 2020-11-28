@@ -6,6 +6,7 @@ use App\Entity\Post;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\Persistence\ManagerRegistry;
+use Faker\Factory;
 
 /**
  * @method Post|null find($id, $lockMode = null, $lockVersion = null)
@@ -40,17 +41,55 @@ class PostRepository extends ServiceEntityRepository
     }
 
     /**
-     * RETURN ALL THE POSTS EXCEPT THE POST GIVEN IN PARAMETER
-     *
      * @param Post $post
-     * @return array|null
+     * @return array
      */
     public function findExcept(Post $post):? array
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.title != :val')
-            ->setParameter('val', $post->getTitle())
+            ->where('p.id != :id')
+            ->setParameter('id', $post->getId())
             ->orderBy('p.id', 'DESC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
+
+    /**
+     * RETURN ALL THE POSTS EXCEPT THE POST GIVEN IN PARAMETER
+     *
+     * @param Post $post
+     * @return Post
+     * @throws NonUniqueResultException
+     */
+    public function findSameCategoryExcept(Post $post):? Post
+    {
+        $faker = Factory::create();
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.id != :val and p.category = :cat')
+            ->setParameters(['val' => $post->getId(), 'cat' => $post->getCategory()])
+            ->orderBy('p.id', $faker->randomElement(['ASC', 'DESC']))
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
+    /**
+     * RETURN MAY LIKE POSTS
+     *
+     * @param Post $post
+     * @param Post $relatedPost
+     * @return array
+     */
+    public function findMayLikePosts(Post $post, Post $relatedPost):? array
+    {
+        $faker = Factory::create();
+        return $this->createQueryBuilder('p')
+            ->where('p.id != :pId and p.id != :rId')
+            ->setParameters(['pId' => $post->getId(), 'rId' => $relatedPost->getId()])
+            ->orderBy('p.id', $faker->randomElement(['ASC', 'DESC']))
+            ->setMaxResults(5)
             ->getQuery()
             ->getResult()
         ;
