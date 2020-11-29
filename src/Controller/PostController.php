@@ -90,22 +90,6 @@ class PostController extends AbstractController
     }
 
     /**
-     * @Route(path="/", name="show_list")
-     * @return Response
-     */
-    public function listPosts()
-    {
-        $post = $this->repository->findOneBy([], ['created_at' => 'DESC']);
-        $posts = NULL;
-        if (NULL !== $post) { $posts = $this->repository->findExcept($post); }
-        return $this->render('Post/list.html.twig', [
-            'posts' => $posts,
-            'post' => $post,
-            'cm' => 'list'
-        ]);
-    }
-
-    /**
      * SHOW THE POST USING THE ID
      *
      * @Route(path="/post/{id}-{slug}", name="show", methods={"GET"}, requirements={"id"="\d+"})

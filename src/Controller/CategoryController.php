@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Entity\User;
 use App\Form\CategoryFormType;
 use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,17 +24,17 @@ class CategoryController extends AbstractController
     /**
      * @var CategoryRepository
      */
-    private $repository;
+    private CategoryRepository $repository;
 
     /**
      * @var EntityManagerInterface
      */
-    private $em;
+    private EntityManagerInterface $em;
 
     /**
      * @var FlashyNotifier
      */
-    private $flashy;
+    private FlashyNotifier $flashy;
 
     /**
      * CategoryController constructor.
@@ -41,7 +42,11 @@ class CategoryController extends AbstractController
      * @param CategoryRepository $repository
      * @param EntityManagerInterface $em
      */
-    public function __construct(FlashyNotifier $flashy, CategoryRepository $repository, EntityManagerInterface $em)
+    public function __construct(
+        FlashyNotifier $flashy,
+        CategoryRepository $repository,
+        EntityManagerInterface $em
+    )
     {
         $this->repository = $repository;
         $this->em = $em;
@@ -111,20 +116,20 @@ class CategoryController extends AbstractController
     /**
      * DELETED THE GIVEN POST
      *
-     * @Route("/{id}/delete", name="delete", methods={"DELETE"}, requirements={"id": "\d+"})
+     * @Route("/{id}/delete", name="delete", methods={"GET"}, requirements={"id": "\d+"})
      * @param Category $category
      * @param Request $request
      * @return Response
      */
     public function delete(Request $request, Category $category): Response
     {
-        if ($this->isCsrfTokenValid('delete_category' . $category->getId(), $request->request->get('_token'))) 
-        {
-            $this->em->remove($category);
-            $this->em->flush();
+        /** @var User $user */
+        $user = $this->getUser();
+        $this->denyAccessUnlessGranted('deleteCategory', $category);
+        $this->em->remove($category);
+        $this->em->flush();
 
-            $this->flashy->success("The category was deleted with success");
-        }
-        return $this->redirectToRoute('app_category_index');
+        $this->flashy->success("The category was deleted with success");
+        return $this->redirectToRoute('app_admin_index');
     }
 }

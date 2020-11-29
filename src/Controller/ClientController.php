@@ -78,7 +78,6 @@ class ClientController extends AbstractController
         $this->ipRepository = $ipRepository;
     }
 
-    private const TEMPLATE_PATH_CLIENT = 'client/';
     /**
      * @Route("/", name="app_client_index", methods={"GET"})
      * @return string
@@ -86,8 +85,8 @@ class ClientController extends AbstractController
     public function index()
     {
         $firstPost = $this->postRepository->findOneBy([], ['id' => 'DESC']);
-        $posts = $this->postRepository->findExcept($firstPost);
-        return $this->render(self::TEMPLATE_PATH_CLIENT.'/index.html.twig', [
+        $posts = $this->postRepository->findExcept($firstPost)->getResult();
+        return $this->render('client/index.html.twig', [
             'firstPost' => $firstPost,
             'posts'     => $posts,
         ]);
@@ -140,6 +139,9 @@ class ClientController extends AbstractController
         $nextPost     = $this->postRepository->findOneBy(['id' => $post->getId() + 1]);
 
         $relatedPost = $this->postRepository->findSameCategoryExcept($post);
+        if ( $relatedPost === null ) {
+            $relatedPost = $this->postRepository->findExcept($post)->setMaxResults(1)->getOneOrNullResult();
+        }
 
         // GET ALL THE CATEGORIES
         $categories = $this->categoryRepository->findAll();

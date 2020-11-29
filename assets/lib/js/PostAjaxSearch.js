@@ -12,7 +12,6 @@ function searchPost(htmlResults)
         $('.posts').css('display', 'none');
         htmlResults.html('');
         $('.posts').html('');
-        console.log(response.data.length);
         if ( response.data.length > 0 ) {
             response.data.forEach(function (post) {
                 htmlResults.css('display', 'flex');
@@ -32,11 +31,20 @@ function searchPost(htmlResults)
                         <h2 class="_font-change-28 h5">
                             <a class="link-c text-decoration-none"
                                href="https://blog.wip/${post.slug}-${post.id}">
-                               ${post.title}
+                               <span class="post-link-js">${post.title}</span>
                             </a>
                         </h2>
                     </div>
                 `);
+            });
+
+            let titles = document.querySelectorAll('.post-link-js');
+            titles.forEach(function (title) {
+                let length = 25;
+                let ending = '...';
+                if (title.textContent.length > 25) {
+                    title.textContent = title.textContent.substring(0, length - ending.length) + ending;
+                }
             });
         }
         else {

@@ -6,6 +6,7 @@ use App\Entity\Dislike;
 use App\Entity\Like;
 use App\Entity\Notification;
 use App\Entity\Post;
+use App\Entity\User;
 use App\Repository\CategoryRepository;
 use App\Repository\DislikeRepository;
 use App\Repository\LikeRepository;
@@ -16,7 +17,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -50,8 +50,20 @@ class AjaxController extends AbstractController
      * @var DislikeRepository
      */
     private DislikeRepository $dislikeRepository;
+    /**
+     * @var CategoryRepository
+     */
+    private CategoryRepository $categoryRepository;
 
-    public function __construct(DislikeRepository $dislikeRepository, EntityManagerInterface $entityManager, LikeRepository $likeRepository, NotificationRepository $notificationRepository, CategoryRepository $repository, PostRepository $postRepository)
+    public function __construct(
+        DislikeRepository $dislikeRepository,
+        EntityManagerInterface $entityManager,
+        LikeRepository $likeRepository,
+        NotificationRepository $notificationRepository,
+        CategoryRepository $repository,
+        PostRepository $postRepository,
+        CategoryRepository $categoryRepository
+    )
     {
         $this->repository = $repository;
         $this->postRepository = $postRepository;
@@ -59,6 +71,7 @@ class AjaxController extends AbstractController
         $this->likeRepository = $likeRepository;
         $this->entityManager = $entityManager;
         $this->dislikeRepository = $dislikeRepository;
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
@@ -70,14 +83,15 @@ class AjaxController extends AbstractController
     public function likePost(Post $post)
     {
         $jsonArrayReturn = [
-            'code'         => 'success',
-            'message'      => '+1',
-            'likeCount'    => 0,
+            'code' => 'success',
+            'message' => '+1',
+            'likeCount' => 0,
             'dislikeCount' => 0,
             'isDisliked' => false
         ];
+        /** @var User $user */
         $user = $this->getUser();
-        if ( $post->isLikedByUser($user) ) {
+        if ($post->isLikedByUser($user)) {
             $userLike = $this->likeRepository->findOneBy(['User' => $user]);
             $post->removeLike($userLike);
 
@@ -86,15 +100,13 @@ class AjaxController extends AbstractController
 
             $jsonArrayReturn['likeCount'] = $post->getLikes()->count();
             $jsonArrayReturn['message'] = '-1';
-        }
-        else {
+        } else {
             $like = new Like();
             $like
                 ->setUser($user)
-                ->setPost($post)
-            ;
+                ->setPost($post);
             $post->addLike($like);
-            if ( $post->isDislikedByUser($user) ) {
+            if ($post->isDislikedByUser($user)) {
                 $userDislike = $this->dislikeRepository->findOneBy(['User' => $user, 'Post' => $post]);
                 $post->removeDislike($userDislike);
                 $this->entityManager->remove($userDislike);
@@ -102,7 +114,7 @@ class AjaxController extends AbstractController
                 $jsonArrayReturn['dislikeCount'] = $post->getDislikes()->count();
             }
             $this->entityManager->persist($like);
-            if ( !in_array('ROLE_ADMIN', $user->getRoles()) ) {
+            if (!in_array('ROLE_ADMIN', $user->getRoles())) {
                 $this->entityManager->persist(
                     (new Notification())
                         ->setIsViewed(false)
@@ -120,6 +132,7 @@ class AjaxController extends AbstractController
     }
 
     //DISLIKE POST
+
     /**
      * @Route("/{slug}-{id}/dislike", name="post_dislike_ajax", methods={"GET", "POST"}, requirements={"id": "\d+", "slug": "[a-z0-9\-]*"})
      * @param Post $post
@@ -134,9 +147,10 @@ class AjaxController extends AbstractController
             'dislikeCount' => 0,
             'likeCount' => 0
         ];
+        /** @var User $user */
         $user = $this->getUser();
         $userDislike = (new Dislike())->setUser($user)->setPost($post);
-        if ( $post->isDislikedByUser($user)) {
+        if ($post->isDislikedByUser($user)) {
             $userDislike = $this->dislikeRepository->findOneBy(['User' => $user, 'Post' => $post]);
             $post->removeDislike($userDislike);
 
@@ -145,14 +159,13 @@ class AjaxController extends AbstractController
 
             $jsonArrayReturn['message'] = '-1';
             $jsonArrayReturn['dislikeCount'] = $post->getDislikes()->count();
-        }
-        else {
+        } else {
             $post->addDislike($userDislike);
-            if ( $post->isLikedByUser($user) ) {
+            if ($post->isLikedByUser($user)) {
                 $userLike = $this->likeRepository->findOneBy(['User' => $user, 'post' => $post]);
                 $post->removeLike($userLike);
                 $this->entityManager->remove($userLike);
-                $jsonArrayReturn['isLiked']  = true;
+                $jsonArrayReturn['isLiked'] = true;
             }
             $this->entityManager->persist($userDislike);
             $jsonArrayReturn['dislikeCount'] = $post->getDislikes()->count();
@@ -177,33 +190,16 @@ class AjaxController extends AbstractController
         if ($name !== "") {
             $name = strtolower($name);
             $len = strlen($name);
-            foreach($categories as $category) {
-                if (stristr($name, substr(strtolower($category->getName()), 0, $len)) AND $len <= strlen($category->getName())) {
+            foreach ($categories as $category) {
+                if (stristr($name, substr(strtolower($category->getName()), 0, $len)) and $len <= strlen($category->getName())) {
                     $foundCategory[] = $category;
                 }
             }
-        }
-        elseif (trim($name) === '') {
+        } elseif (trim($name) === '') {
             $foundCategory = $categories;
         }
 
         return $this->json($foundCategory, 200, [], ['groups' => "category:search"]);
-    }
-
-    /**
-     * @Route("/admin/notifcations/get", name="get_notifications", methods={"POST"})
-     * @return JsonResponse
-     */
-    public function getNotifications(): JsonResponse
-    {
-        $notifications = $this->notificationRepository->findBy(['IsViewed' => false], ['id' => 'DESC']);
-        $todayNotifications = [];
-        $previousNotifications = [];
-        foreach ($notifications as $notification) {
-            if (date_format($notification->getCreatedAt(), 'd') === date('d')) $todayNotifications[] = $notification;
-            else $previousNotifications = $notification;
-        }
-        return $this->json(['notViewedNotifications' => $notifications, 'previousNotifications' => $previousNotifications, 'todayNotifications' => $todayNotifications]);
     }
 
     /**
@@ -214,23 +210,6 @@ class AjaxController extends AbstractController
     {
         $notifications = $this->notificationRepository->findBy(['IsViewed' => false]);
         return $this->json(['count' => count($notifications)]);
-    }
-
-    /**
-     * @Route("/notifications/get", methods={"POST"})
-     * @return JsonResponse
-     */
-    public function getUnseenNotifications(): JsonResponse
-    {
-        $notifications =$this->notificationRepository->findBy([], ['createdAt' => 'DESC']);
-        $returnedNotifications = [];
-        foreach ($notifications as $notification)
-            if (date_format($notification->getCreatedAt(), 'd') === date('d'))
-                $returnedNotifications[] = $notification;
-        return $this->json($returnedNotifications
-            , 200, [], [
-            'groups' => 'ajax_notifications'
-        ]);
     }
 
     /**
@@ -247,18 +226,54 @@ class AjaxController extends AbstractController
         if ($title !== '') {
             $title = strtolower($title);
             $len = strlen($title);
-            foreach ($posts as $post)
-            {
+            foreach ($posts as $post) {
                 if (stristr($title, substr(strtolower($post->getTitle()), 0, $len))) $foundedPosts[] = $post;
             }
 
             return $this->json($foundedPosts, 200, [], ['groups' => 'post:ajax']);
         }
 
-        if ( count($foundedPosts) === 0 ) {
+        if (count($foundedPosts) === 0) {
             $foundedPosts = $posts;
         }
 
-        return $this->json($foundedPosts , 200, [], ['groups' => 'post:ajax']);
+        return $this->json($foundedPosts, 200, [], ['groups' => 'post:ajax']);
+    }
+
+    /**
+     * @Route("/category/get", methods={"POST"})
+     * @param Request $request
+     * @return false|string
+     */
+    public function searchCategory(Request $request)
+    {
+        $categories = $this->categoryRepository->findAll();
+        $returnCategories = [];
+        try {
+            $data = json_decode($request->getContent(), true);
+        } catch (\Exception $exception) {
+            return json_encode([
+                'error' => $exception->getMessage(),
+            ], 500);
+        }
+
+        $title = strtolower(trim($data['title']));
+        $len = strlen($title);
+        if ($title != '') {
+            foreach ($categories as $category) {
+                if (stristr($title, substr(strtolower($category->getName()), 0, $len))) {
+                    $returnCategories[] = $category;
+                }
+            }
+        } else {
+            $returnCategories = $categories;
+        }
+
+        return $this->json(
+            $returnCategories,
+            200,
+            ['Content-Type' => 'application/json'],
+            ['groups' => 'category:get']
+        );
     }
 }

@@ -18,7 +18,10 @@
                             <span class="cat">{{ post.category.name }}</span>
                         </small>
                         <h5 class="_font-25-sm">
-                            <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="link-c">{{ post.title }}</a>
+                            <a class="link-c"
+                               href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}">
+                                {{ post.title }}
+                            </a>
                         </h5>
                     </div>
                 {% endfor %}

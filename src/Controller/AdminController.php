@@ -65,15 +65,14 @@ class AdminController extends AbstractController
     /**
      * GET ALL THE POSTS OR GET THE POST BY THE TITLE GIVEN IN THE SEARCH BOX
      *
-     * @Route("/", name="index", methods={"GET", "POST"})
+     * @Route("/{redirect_from?}", name="index", methods={"GET", "POST"}, requirements={"redirect_from": "[a-z]+"})
      * @param Request $request
      * @return Response
      */
-    public function index(Request $request): Response
+    public function index(Request $request, $redirect_from): Response
     {
         $post     = ( new Post() )->setViews(0);
         $category = new Category();
-
         $posts = [];
         $action['action'] = 'request';
         if ($request->getMethod() === 'POST' AND $request->request->has('_title') && trim($request->request->get('_title')) !== '') {
@@ -126,7 +125,8 @@ class AdminController extends AbstractController
             'cm' => 'dashboard',
             'PostCount' => $count,
             'commentCount' => count($this->commentRepository->findAll()),
-            'views' => $views
+            'views' => $views,
+            '__action' => $redirect_from
         ]);
     }
 
@@ -165,15 +165,18 @@ class AdminController extends AbstractController
     /**
      * @Route("/admin/{id}/delete", name="post_delete", methods={"GET"}, requirements={"id": "\d+"})
      * @param Post $post
+     * @param Request $request
      * @return RedirectResponse
      */
-    public function deletePost(Post $post)
+    public function deletePost(Post $post, Request $request)
     {
         $this->denyAccessUnlessGranted('delete', $post);
         $this->em->remove($post);
         $this->em->flush();
 
         $this->flashyNotifier->success('The post was deleted with successfully !');
-        return $this->redirectToRoute('app_client_index');
+        return $this->redirectToRoute('app_admin_index', [
+            'redirect_from' => 'post'
+        ]);
     }
 }

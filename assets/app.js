@@ -16,5 +16,6 @@ require('@fortawesome/fontawesome-free/js/all.js');
 import flashy from "./lib/js/flashy.js";
 import PostAjaxSearch from './lib/js/PostAjaxSearch';
 import LazyLoad from './lib/js/LazyLoad';
+import CategorySearchAjax from './lib/js/CategorySearchAjax';
 
 window.flashy = flashy;

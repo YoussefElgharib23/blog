@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Post;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 use Faker\Factory;
 
@@ -42,16 +43,15 @@ class PostRepository extends ServiceEntityRepository
 
     /**
      * @param Post $post
-     * @return array
+     * @return Query
      */
-    public function findExcept(Post $post):? array
+    public function findExcept(Post $post): Query
     {
         return $this->createQueryBuilder('p')
             ->where('p.id != :id')
             ->setParameter('id', $post->getId())
             ->orderBy('p.id', 'DESC')
             ->getQuery()
-            ->getResult()
         ;
     }
 
@@ -79,10 +79,10 @@ class PostRepository extends ServiceEntityRepository
      * RETURN MAY LIKE POSTS
      *
      * @param Post $post
-     * @param Post $relatedPost
+     * @param Post|null $relatedPost
      * @return array
      */
-    public function findMayLikePosts(Post $post, Post $relatedPost):? array
+    public function findMayLikePosts(Post $post, ?Post $relatedPost):? array
     {
         $faker = Factory::create();
         return $this->createQueryBuilder('p')
@@ -112,7 +112,7 @@ class PostRepository extends ServiceEntityRepository
             ->setParameter('id', $post->getId())
             ->getQuery()
             ->getOneOrNullResult()
-            ;
+        ;
     }
 
     // /**

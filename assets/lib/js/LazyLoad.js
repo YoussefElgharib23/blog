@@ -6,9 +6,10 @@ const lazyLoad = target => {
             if ( entry.isIntersecting ) {
                 const img = entry.target;
                 const src = img.getAttribute('data-lazy');
-
-                img.setAttribute('src', src);
-                img.classList.remove('fade');
+                if ( src !== null ) {
+                    img.setAttribute('src', src);
+                }
+                img.classList.add('show');
 
                 observer.disconnect();
             }

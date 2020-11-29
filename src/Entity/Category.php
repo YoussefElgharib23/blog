@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Traits\FormattedTimeStamps;
 use App\Traits\TimeStamps;
 use Cocur\Slugify\Slugify;
 use Doctrine\ORM\Mapping as ORM;
@@ -19,19 +20,19 @@ use Symfony\Component\Serializer\Annotation\Groups;
  */
 class Category
 {
-    use TimeStamps;
+    use FormattedTimeStamps;
 
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups("category:search")
+     * @Groups("category:get")
      */
     private ?int $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups("category:search")
+     * @Groups("category:get")
      * @Groups ("post:ajax")
      */
     private ?string $name;

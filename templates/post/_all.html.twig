@@ -1,17 +1,8 @@
 {% set defaultImage = 'https://lh3.googleusercontent.com/proxy/cuBWCjkhFHdJ5P3ASANB0msysX4FWJlBTDAzgPTad5xSbPXmnEeP6ZZlVlHadhtdOlPcJeFJnw-o-SMxGyrmfjKp_1cz0fp_K88IOu93vfHrvzsU-6szQh3NE4thDlY' %}
+<h1 class="text-secondary text-center">All Posts</h1>
 
-{% if action['action'] == 'search' %}
-    <h2 class="text-center">Results for <span class="text-muted _founded-posts">"{{ action['search_var'] }}"</span></h2>
-{% else %}
-    <h2 class="text-center">All posts</h2>
-{% endif %}
-<form class="form-inline" method="POST">
-    <div class="d-s-i-p form-inline my-2">
-        <i class="fa fa-search text-muted"></i>
-        <input type="text" id="search-in-post-js" name="_title" placeholder="Search for post" value="{{ action['search_var'] ?? '' }}">
-    </div>
-    <button type="submit" class="ml-2 btn btn-sm btn-success">Search</button>
-</form>
+<input id="search-in-post-js" name="_title" placeholder="Search for post" type="text">
+
 {% if posts | length > 0 %}
     <div class="posts">
         <div class="row mt-4" id="posts-preview">
@@ -20,8 +11,9 @@
                     <div style="position: relative" class="article-image">
                         <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}">
                             <img alt=""
-                                 class="article-img-pre img-ani rounded img-fluid mw-100"
-                                 src="{{ post.imageLink ?? defaultImage }}">
+                                 data-lazy="{{ post.imageLink }}"
+                                 class="article-img-pre rounded img-fluid mw-100 fade"
+                                 src="">
                         </a>
                     </div>
                     <small>
@@ -31,7 +23,7 @@
                     <h2 class="_font-change-28 h5">
                         <a class="link-c text-decoration-none"
                            href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}">
-                            {{ post.title | u.truncate(25, '...', false) }}
+                            {{ post.title | u.truncate(25, '...', true) }}
                         </a>
                     </h2>
                 </div>
@@ -42,3 +34,10 @@
 {% else %}
     <div class="mt-4 alert alert-danger text-center">No posts !</div>
 {% endif %}
+
+{% block javascripts %}
+
+    <script>
+    </script>
+
+{% endblock%}
