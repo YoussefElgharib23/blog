@@ -254,4 +254,16 @@ class UserController extends AbstractController
 
         $this->entityManager->flush();
     }
+
+    /**
+     * @Route("/{id}", name="profile", methods={"GET"}, requirements={"id": "\d+"})
+     * @param User $user
+     * @return Response
+     */
+    public function profileUser(User $user): Response
+    {
+        return $this->render('admin/user/user.html.twig', [
+            'user' => $user
+        ]);
+    }
 }

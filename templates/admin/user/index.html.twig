@@ -46,7 +46,11 @@
                 {% for user in activeUsers %}
                     <tr>
                         <td>{{ user.id }}</td>
-                        <td>{{ user.fullName }}</td>
+                        <td>
+                            <a href="{{ path('app_admin_user_profile', {'id': user.id}) }}" class="link-c">
+                                {{ user.fullName }}
+                            </a>
+                        </td>
                         <td>{{ user.status }}</td>
                         <td>{{ user.createdAt | date('M d, Y') }}</td>
                         <td>

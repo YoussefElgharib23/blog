@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title 'Profile user ' ~ user.fullName %}
+
+{% block body %}
+    {{ include('client/shared/_style.html.twig') }}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 d-flex justify-content-center align-items-center">
+                <i class="fa fa-user fa-10x my-4"></i>
+            </div>
+            <div class="col-md-8 d-flex flex-column justify-content-center">
+                <h4>Uer full name: {{ user.fullName }}</h4>
+                {% if user.createdAt | date('M d, Y') == "now"|date('M d, Y') %}
+                    <h5>Joined today</h5>
+                {% else %}
+                    <h5>Joined at {{ user.createdAt | date('M d, Y') }}</h5>
+                {% endif %}
+                <p>Total likes : {{ user.likes.count }} | Total comment : {{ user.comments.count }}</p>
+                <div>
+                    <a href="" class="btn btn-outline-info">Suspend user</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
