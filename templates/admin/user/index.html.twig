@@ -24,7 +24,8 @@
         <form action="{{ path('app_admin_user_search_user') }}" method="POST">
             <div class="form-group">
                 <label class="form-inline">
-                    <input type="text" class="form-control" name="_username" placeholder="Search for user" value="{{ username ?? '' }}">
+                    <input type="text" class="form-control" name="_username" placeholder="Search for user"
+                           value="{{ username ?? '' }}">
                     <button type="submit" class="btn-xm-block btn btn-outline-info btn-sm ml-2 mt-xm-2">
                         <i class="fa fa-search"></i> Search
                     </button>
@@ -34,13 +35,13 @@
         {% if username is not defined %}
             <table class="table table-hover shadow rounded-lg p-3">
                 <thead class="bg-dark text-light rounded-lg">
-                    <tr>
-                        <th>Id</th>
-                        <th>Full name</th>
-                        <th>Account Status</th>
-                        <th>Created At</th>
-                        <th>Actions</th>
-                    </tr>
+                <tr>
+                    <th>Id</th>
+                    <th>Full name</th>
+                    <th>Account Status</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
                 </thead>
                 <tbody>
                 {% for user in activeUsers %}
@@ -108,7 +109,7 @@
                 {% endfor %}
                 </tbody>
             </table>
-        {% elseif username is defined and user is not null %}
+        {% elseif username is defined and users | length > 0 %}
             <h3 class="text-center my-2 mb-4">Result for {{ username }}</h3>
             <table class="table table-hover shadow rounded-lg p-3">
                 <thead class="bg-dark text-light rounded-lg">
@@ -121,23 +122,46 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>{{ user.id }}</td>
-                        <td>{{ user.fullName }}</td>
-                        <td>{{ user.status }}</td>
-                        <td>{{ user.createdAt | date('M d, Y') }}</td>
-                        <td>
-                            <div class="row">
-                                <div class="col-md-6 mb-xm">
-                                    <a href="#" class="btn btn-sm btn-block btn-success">Active</a>
+                {% for user in users %}
+                    {% if user.status == 'active' %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>
+                                <a href="{{ path('app_admin_user_profile', {'id': user.id}) }}" class="link-c">
+                                    {{ user.fullName }}
+                                </a>
+                            </td>
+                            <td>{{ user.status }}</td>
+                            <td>{{ user.createdAt | date('M d, Y') }}</td>
+                            <td>
+                                <div class="row">
+                                    <div class="col-md-6 mb-xm">
+                                        <a class="btn btn-sm btn-danger"
+                                           href="{{ path('app_admin_user_suspend', {'id': user.id}) }}">Suspend</a>
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-xm">
-                                    <a class="btn btn-sm btn-block btn-danger"
-                                       href="{{ path('app_admin_user_delete', {'id': user.id}) }}">Delete</a>
+                            </td>
+                        </tr>
+                    {% elseif user.status == 'suspend' %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.fullName }}</td>
+                            <td>{{ user.status }}</td>
+                            <td>{{ user.createdAt | date('M d, Y') }}</td>
+                            <td>
+                                <div class="row">
+                                    <div class="col-md-6 mb-xm">
+                                        <a href="#" class="btn btn-sm btn-block btn-success">Active</a>
+                                    </div>
+                                    <div class="col-md-6 mb-xm">
+                                        <a class="btn btn-sm btn-block btn-danger"
+                                           href="{{ path('app_admin_user_delete', {'id': user.id}) }}">Delete</a>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                    </tr>
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
                 </tbody>
             </table>
         {% else %}
@@ -154,7 +178,7 @@
 
     <script>
         $('#delete_user_permanently_js').click(function (event) {
-            if ( !confirm('Are you sur you wanna delete the user permanently ?') ) event.preventDefault();
+            if (!confirm('Are you sur you wanna delete the user permanently ?')) event.preventDefault();
         });
     </script>
 

@@ -110,7 +110,7 @@ class ClientController extends AbstractController
         // INCREMENT THE POST VIEWS | SET THE COMMENT | DELETE COMMENT ACTIONS | STORE THE CLIENT IP
         // ADD THE VIEWS ALSO THE CLIENT IP TO THE DATABASE AND STORE THE CHANGES
         $bus->dispatch(new PostViewsIncerement($post->getId()));
-        if ( $this->getUser() AND in_array('ROLE_USER', $this->getUser()->getRoles()) ) {
+        if ( $this->getUser() AND !in_array('ROLE_ADMIN', $this->getUser()->getRoles()) ) {
             $bus->dispatch(new StoreIp($request->getClientIp(), 'USER'));
         }
 

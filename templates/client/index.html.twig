@@ -9,7 +9,7 @@
         <div class="row mt-4">
             <div class="col-md-6">
                 <a href="{{ path('app_client_show_post', {'id': firstPost.id, 'slug': firstPost.slug}) }}">
-                    <img alt="" class="mw-100 rounded-lg" src="{{ firstPost.imageLink }}">
+                    <img alt="" class="mw-100 rounded-lg fade" data-lazy="{{ firstPost.imageLink }}" src="">
                 </a>
             </div>
             <div class="col-md-6 mt-2">
@@ -36,7 +36,7 @@
             {% for post in posts %}
                 <div class="col-lg-3 col-md-4 col-sm-6">
                     <a href="{{ path('app_client_show_post', {'id': post.id, 'slug': post.slug}) }}" class="article-img-link">
-                        <img class="rounded-lg img-fluid" src="{{ post.imageLink }}"  alt="">
+                        <img class="rounded-lg img-fluid fade" data-lazy="{{ post.imageLink }}" src="" alt="">
                     </a>
                     <small>
                         <span class="cat">{{ post.category.name }}</span>

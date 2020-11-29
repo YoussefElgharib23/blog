@@ -31,6 +31,7 @@ class UserController extends AbstractController
     const STATUS = [
         'suspended',
         'deleted',
+        'active'
     ];
     /**
      * @var EntityManagerInterface
@@ -172,38 +173,40 @@ class UserController extends AbstractController
     }
 
     /**
+     * SEARCH FOR USER
      *
      * @Route("/{firstName?|lastName?|username?}", name="search_user", methods={"GET", "POST"}, requirements={"firstName": "[a-z\ ]*"})
-     * @param User|null $user
      * @param Request $request
      * @return Response
      */
     public function searchUser(Request $request)
     {
         $username = null;
-        $user = null;
+        $_users = [];
         if ( $request->isMethod('POST') ) {
             $username = strtolower($request->request->get('_username'));
             $username = trim($username);
             if ( $username === '' ) return $this->redirectToRoute('app_admin_user_index');
-
-            $user = $this->userRepository->findOneBy(['firstName' => $username]);
-            if ( $user === null ) $user = $this->userRepository->findOneBy(['lastName' => $username]);
-            if ( $user === null ) $user = $this->userRepository->findOneBy(['fullName' => $username]);
-
-            if ( $user === null ) {
+            $users = $this->userRepository->findAll();
+            if ( [] === $_users ) {
                 $len = strlen($username);
                 $users = $this->userRepository->findAll();
                 foreach($users as $_user) {
-                    if (stristr($username, substr($_user->getFullName(), 0, $len))) {
-                        $user = $_user;
+                    if (stristr($username, substr($_user->getFirstName(), 0, $len)) AND !in_array($_user, $_users)) {
+                        $_users[] = $_user;
+                    }
+                    if (stristr($username, substr($_user->getLastName(), 0, $len)) AND !in_array($_user, $_users)) {
+                        $_users[] = $_user;
+                    }
+                    if (stristr($username, substr($_user->getFullName(), 0, $len)) AND !in_array($_user, $_users)) {
+                        $_users[] = $_user;
                     }
                 }
             }
         }
 
         return $this->render('admin/user/index.html.twig',[
-            'user' => $user,
+            'users' => $_users,
             'username' => $username,
         ]);
     }
